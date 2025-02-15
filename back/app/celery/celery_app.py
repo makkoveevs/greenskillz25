@@ -71,7 +71,7 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
 
     slide_1 = Slide(id=uuid.uuid4(), slide_num=1, slide_header=theme, elements=[
         {
-            "id": uuid.uuid4(),
+            "id": str(uuid.uuid4()),
             "text_type": "header",  # regular, header, list
             "alignment": "center",  # left, right, center, justify
             "style": "bold",  # regular, bold, italic
@@ -86,7 +86,7 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
                     request_id=request_id)
     db_work.create_obj(slide_1)
     elements_2 = [{
-            "id": uuid.uuid4(),
+            "id": str(uuid.uuid4()),
             "text_type": "regular",  # regular, header, list
             "alignment": "center",  # left, right, center, justify
             "style": "bold",  # regular, bold, italic
@@ -98,7 +98,7 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
             "y": 0,
         } for i in slides]
     elements_2.insert(0, {
-            "id": uuid.uuid4(),
+            "id": str(uuid.uuid4()),
             "text_type": "header",  # regular, header, list
             "alignment": "center",  # left, right, center, justify
             "style": "bold",  # regular, bold, italic
@@ -122,7 +122,7 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
         slide_content = slide_content if slide_content else "pass"
         elements = [
             {
-                "id": uuid.uuid4(),
+                "id": str(uuid.uuid4()),
               "text_type": "header", # regular, header, list
               "alignment": "center", # left, right, center, justify
               "style": "bold", # regular, bold, italic
@@ -134,7 +134,7 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
                 "y": 0,
             },
             {
-                "id": uuid.uuid4(),
+                "id": str(uuid.uuid4()),
               "text_type": "regular",
               "alignment": "left",
               "style": "regular",

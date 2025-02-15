@@ -151,24 +151,24 @@ async def get_presentation(
 #     await db_work.save_obj()
 
 
-@router.delete("/presentation/{presentation_id}")
+@router.delete("/request/{request_id}")
 async def delete_presentation(
-        presentation_id: uuid.UUID,
+        request_id: uuid.UUID,
         db_work: DBWork = Depends(get_db_work)
 ):
     user = UserKeycloak(email_verified=False, groups=[], preferred_username="default", sub=user_id_default)
-    presentation_obj: PresentationResultModel = await db_work.get_one_obj(
+    reques_obj: PresentationRequestModel = await db_work.get_one_obj(
         PresentationResultModel,
-        {'id': presentation_id}
+        {'id': request_id}
     )
-    if not presentation_obj:
+    if not reques_obj:
         raise error_dict.get(ErrorName.DoesNotExist)
     if settings.DEFAULT_ADMIN_GROUP not in user.groups:
-        if str(presentation_obj.user_id) != str(user.sub):
+        if str(reques_obj.user_id) != str(user.sub):
             raise error_dict.get(ErrorName.Forbidden)
-    await db_work.delete_obj(PresentationRequestModel, {'id': presentation_obj.request_id})
-    await db_work.delete_obj(PresentationResultModel, {'id': presentation_id})
-    await db_work.delete_obj(SlideModel, {'id': presentation_obj.request_id})
+    await db_work.delete_obj(PresentationRequestModel, {'id': reques_obj.id})
+    await db_work.delete_obj(PresentationResultModel, {'request_id': request_id})
+    await db_work.delete_obj(SlideModel, {'id': reques_obj.id})
     return {
         "message": "Presentation deleted successfully"
     }
