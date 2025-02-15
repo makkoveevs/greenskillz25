@@ -11,4 +11,4 @@ visual_results
 Dockerfile*
 *compose.yml
 /rmq
-*.pptx
+# *.pptx
