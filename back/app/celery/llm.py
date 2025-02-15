@@ -13,7 +13,7 @@ def remove_chinese(text):
     return re.sub(pattern, '', text)
 
 
-llm = ChatOllama(model="qwen2.5:14b", temperature=0.0)
+llm = ChatOllama(model="qwen2.5:14b", temperature=0.0, base_url='http://ollama:11434')
 
 def get_slide_2(theme, header, history = "", context = ""):
     return "agsdhjhagskdhakshdk PROMT"
