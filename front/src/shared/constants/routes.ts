@@ -1,4 +1,6 @@
 export const ROUTES = {
   MAIN: "/",
-  PROFILE: "app/profile"
+  APP: "/app",
+  PROFILE: "/app/profile",
+  PRESENTATION: "prez/:request_id"
 };
