@@ -3,8 +3,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.api.deps import keycloak_client, get_db_work
 from app.core.postgres import DBWork, Sort
 from app.models.models import PresentationResult, PresentationRequest
-from app.schemas.auth_schemas import LoginRequest, RegisterRequest
+from app.schemas.auth_schemas import LoginRequest, RegisterRequest, UserKeycloak
 from app.schemas.presentations_schema import MyPresentationsRequestList, PresentationsRequestResponseCompleted
+from app.core.config import settings
 
 router = APIRouter()
 
@@ -20,9 +21,9 @@ async def login(data: LoginRequest):
 
 
 @router.get("/me")
-async def protected_route(user=Depends(keycloak_client.get_current_user),
-                          db_work: DBWork = Depends(get_db_work)):
+async def protected_route(db_work: DBWork = Depends(get_db_work)):
     """ Защищённый маршрут, доступный только с токеном """
+    user = UserKeycloak(email_verified=False, groups=[], preferred_username="default", sub=settings.get_default_user)
     presentation_list = await db_work.get_my_preses(filter_dict=[{"field": PresentationRequest.user_id, "value": user.sub}],
                                                     sort=[Sort(desc=True, sort_value=PresentationResult.created_at)],
                                                     fields_output=["id", "request_id", "status", "theme"])

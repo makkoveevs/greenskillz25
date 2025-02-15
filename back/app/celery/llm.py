@@ -3,7 +3,7 @@ import warnings
 warnings.filterwarnings('ignore')
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama import ChatOllama
-from back.app.celery.prompt import SLIDE_PROMPT, SLIDE_UPDATE, TITLE_PROMPT, SUMMARIZE_PROMPT
+from app.celery.prompt import SLIDE_PROMPT, SLIDE_UPDATE, TITLE_PROMPT, SUMMARIZE_PROMPT
 from pydantic import BaseModel, Field
 import re
 

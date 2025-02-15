@@ -16,12 +16,12 @@ from typing import Any, List, Union
 
 async def upload_files(files, request_id, s3_client):
     file_path_list = []
+    tasks = []
     for file in files:
-        tasks = []
         file_type = file.filename.split(".")[-1]
         file.filename = file.filename[: -len(file_type)]
-        file.filename = file.filename + "." + file_type
-        file_path = f"/request/{request_id}/source/{file.filename}"
+        file.filename = file.filename + file_type
+        file_path = f"request/{request_id}/source/{file.filename}"
         file_data = BytesIO()
         file.file.seek(0)
         content = await file.read()
