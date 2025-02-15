@@ -53,6 +53,7 @@ async def create_request(
         count_slides=request_data.count_slides,
         status=RequestStatus.PENDING
     )
+    file_path_list = []
     if files:
         file_path_list = await file_utils.upload_files(files, presentation_request.id, s3_client)
     await db_work.create(presentation_request)
