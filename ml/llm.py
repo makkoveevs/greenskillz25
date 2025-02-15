@@ -3,7 +3,7 @@ import warnings
 warnings.filterwarnings('ignore')
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama import ChatOllama
-from prompt import SLIDE_PROMPT, SLIDE_UPDATE, TITLE_PROMPT, SUMMARIZE_PROMPT
+from ml.prompt import SLIDE_PROMPT, SLIDE_UPDATE, TITLE_PROMPT, SUMMARIZE_PROMPT
 from pydantic import BaseModel, Field
 
 
@@ -36,13 +36,22 @@ class SlidesList(BaseModel):
 
 def get_presentation_content_structured(theme, num_slides = 5, content=""):
 
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system", TITLE_PROMPT),
-            ("user", "{theme}, {num_slides}, {content}"),
-        ]
-    )
-    messages = prompt.invoke({"theme": theme, "num_slides": num_slides, "content": content})
+    if content != "":
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", TITLE_PROMPT),
+                ("user", "{theme}, {num_slides}, {content}"),
+            ]
+        )
+        messages = prompt.invoke({"theme": theme, "num_slides": num_slides, "content": content})
+    else:
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", TITLE_PROMPT),
+                ("user", "{theme}, {num_slides}"),
+            ]
+        )
+        messages = prompt.invoke({"theme": theme, "num_slides": num_slides})
     model_with_structure = llm.with_structured_output(SlidesList)
     structured_output = model_with_structure.invoke(messages)
     
