@@ -126,7 +126,7 @@ services:
       POSTGRES_PASSWORD: greenskils
       POSTGRES_DB: greenskils
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U greenskils" ]
+      test: [ "CMD-SHELL", "pg_isready -U postgres2" ]
       interval: 10s
       timeout: 5s
       retries: 5
