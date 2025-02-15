@@ -113,7 +113,7 @@ async def get_presentation(
 
     slides: List[SlideModel] = await db_work.get_objects(SlideModel,
                                        [{"field": SlideModel.request_id, "value": presentation_obj.request_id}],
-                                       sort=[Sort(desc=True, sort_value=SlideModel.slide_num)])
+                                       sort=[Sort(desc=False, sort_value=SlideModel.slide_num)])
     slides = [Slide(id=i.id, slide_number=i.slide_num, elements=i.elements) for i in slides]
 
     request = await db_work.get_one_obj(PresentationRequestModel,

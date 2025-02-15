@@ -42,14 +42,13 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
     presentation_content = get_presentation_content_structured_2(theme=theme,
                                                                 num_slides=num_slides, content=text_file)
     if presentation_content and isinstance(presentation_content, dict) and len(presentation_content.get('slides', {})):
-        count = 1
-        while count <= num_slides:
+        count = 3
+        while count <= num_slides + 2:
             slide = Slide(id=uuid.uuid4(), slide_num=count,
                           slide_header=presentation_content.get('slides', {}).get(f'slide_{count}', ''),
                           elements={}, request_id=request_id)
             db_work.create_obj(slide)
             count += 1
-            print(count)
         presentation_obj = PresentationResult(id=uuid.uuid4(), theme=theme, request_id=request_id, user_id=user_id)
         db_work.create_obj(presentation_obj)
     else:
@@ -58,7 +57,7 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
         return
 
     slides: List[Slide] = db_work.get_objects(Slide, [{"field": Slide.request_id, "value": request_id}],
-                                 [Sort(desc=True, sort_value=Slide.created_at)])
+                                 [Sort(desc=False, sort_value=Slide.created_at)])
     history = ""
 
     slide_1 = Slide(id=uuid.uuid4(), slide_num=1, slide_header=theme, elements=[
@@ -98,10 +97,11 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
             "x": 0,
             "y": 0,
         })
-    slide_2 = Slide(id=uuid.uuid4(), slide_num=3, slide_header=theme, elements=elements_2,
+    slide_2 = Slide(id=uuid.uuid4(), slide_num=2, slide_header=theme, elements=elements_2,
                     request_id=request_id)
+    db_work.create_obj(slide_2)
 
-    for n, slide in enumerate(slides, 1):
+    for slide in slides:
         content = ''
         if files:
             content = get_rag_context(vector_store, slide.slide_header)
