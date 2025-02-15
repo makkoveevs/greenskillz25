@@ -26,6 +26,7 @@ from app.utils import files as file_utils
 
 router = APIRouter()
 
+user_id_default = "a28a223c-61a3-4a4e-87cb-77cfdd979b85"
 
 def checker(data: str = Form(...)):
     try:
@@ -41,10 +42,10 @@ def checker(data: str = Form(...)):
 async def create_request(
         request_data: PresentationsRequest = Depends(checker),
         files: PresentationsRequestFile = Depends(),
-        user: UserKeycloak = Depends(keycloak_client.get_current_user),
         s3_client: MinioClient = Depends(get_minio_client),
         db_work: DBWork = Depends(get_db_work)
 ):
+    user: UserKeycloak(email_verified=False, groups=[], preferred_username="default", sub=user_id_default)
     files = files.new_files if len(files.new_files) > 0 else None
     presentation_request = PresentationRequestModel(
         id=uuid.uuid4(),
@@ -70,9 +71,9 @@ async def create_request(
 @router.get("/request/{request_id}")
 async def get_request(
         request_id: uuid.UUID,
-        user: UserKeycloak = Depends(keycloak_client.get_current_user),
         db_work: DBWork = Depends(get_db_work)
 ):
+    user: UserKeycloak(email_verified=False, groups=[], preferred_username="default", sub=user_id_default)
     request_obj: PresentationRequestModel = await db_work.get_one_obj(PresentationRequestModel, {'id': request_id})
     if not request_obj:
         raise error_dict.get(ErrorName.DoesNotExist)
@@ -98,9 +99,9 @@ async def get_request(
 @router.get("/presentation/{presentation_id}")
 async def get_presentation(
         presentation_id: uuid.UUID,
-        user: UserKeycloak = Depends(keycloak_client.get_current_user),
         db_work: DBWork = Depends(get_db_work)
 ):
+    user: UserKeycloak(email_verified=False, groups=[], preferred_username="default", sub=user_id_default)
     presentation_obj: PresentationResultModel = await db_work.get_one_obj(
         PresentationResultModel,
         {'id': presentation_id}
@@ -153,9 +154,9 @@ async def get_presentation(
 @router.delete("/presentation/{presentation_id}")
 async def delete_presentation(
         presentation_id: uuid.UUID,
-        user: UserKeycloak = Depends(keycloak_client.get_current_user),
         db_work: DBWork = Depends(get_db_work)
 ):
+    user: UserKeycloak(email_verified=False, groups=[], preferred_username="default", sub=user_id_default)
     presentation_obj: PresentationResultModel = await db_work.get_one_obj(
         PresentationResultModel,
         {'id': presentation_id}

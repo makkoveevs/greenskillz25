@@ -31,7 +31,7 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
     if files:
 
         for file in files:
-            download_file(file, f'docs/{file.split("/")[-1]}')
+            download_file("request/633619e2-3ef9-4c8c-96db-95ebe883dee4/source/", f'docs/{file.split("/")[-1]}')
             doc = parse_file_in_document(file)
             text_file += get_text_from_document(doc)
             doc_list.append(doc)
