@@ -3,16 +3,16 @@ import warnings
 warnings.filterwarnings('ignore')
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama import ChatOllama
-from prompt import SLIDE_PROMPT, SLIDE_UPDATE, TITLE_PROMPT, SUMMARIZE_PROMPT
+from app.celery.prompt import SLIDE_PROMPT, SLIDE_UPDATE, TITLE_PROMPT, SUMMARIZE_PROMPT
 from pydantic import BaseModel, Field
 
 
 llm = ChatOllama(model="qwen2.5:14b", temperature=0.0)
 
-def get_slide_2(theme, header, history = ""):
+def get_slide_2(theme, header, history = "", context = ""):
     return "agsdhjhagskdhakshdk PROMT"
 
-def get_presentation_content_structured_2(theme, num_slides = 5):
+def get_presentation_content_structured_2(theme, num_slides = 5, content=""):
     return {'slides': {'slide_1': 'Введение в Росатом',
                 'slide_2': 'История и развитие Росатома',
                 'slide_3': 'Основные направления деятельности Росатома',

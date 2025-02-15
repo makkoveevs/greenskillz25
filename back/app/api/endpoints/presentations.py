@@ -40,12 +40,12 @@ def checker(data: str = Form(...)):
 @router.post("/request")
 async def create_request(
         request_data: PresentationsRequest = Depends(checker),
-        file: PresentationsRequestFile = Depends(),
+        files: PresentationsRequestFile = Depends(),
         user: UserKeycloak = Depends(keycloak_client.get_current_user),
         s3_client: MinioClient = Depends(get_minio_client),
         db_work: DBWork = Depends(get_db_work)
 ):
-    file = file.new_files[0] if len(file.new_files) > 0 else None
+    files = file.new_files if len(files.new_files) > 0 else None
     presentation_request = PresentationRequestModel(
         id=uuid.uuid4(),
         user_id=user.sub,
@@ -53,11 +53,11 @@ async def create_request(
         count_slides=request_data.count_slides,
         status=RequestStatus.PENDING
     )
-    if file:
-        file_path = await file_utils.upload_files(file, presentation_request.id, s3_client)
+    if files:
+        file_path_list = await file_utils.upload_files(files, presentation_request.id, s3_client)
     await db_work.create(presentation_request)
     celery_create_request.delay(request_id=presentation_request.id, theme=request_data.theme,
-                                user_id=user.sub, num_slides=request_data.count_slides)
+                                user_id=user.sub, num_slides=request_data.count_slides, files=file_path_list)
     return PresentationsRequestResponseCompleted(
         presentation_id=None,
         request_id=presentation_request.id,

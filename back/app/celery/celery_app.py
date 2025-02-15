@@ -9,6 +9,10 @@ from app.models.models import PresentationRequest, RequestStatus, PresentationRe
 from app.celery.posrgres_sync import SyncDBWork, Sort
 from app.core.config import settings
 from app.celery.llm import get_presentation_content_structured_2, get_slide_2
+from app.celery.rag import parse_file_in_document, get_text_from_document, create_vector_store, get_rag_context
+
+from langchain_ollama import OllamaEmbeddings
+from langchain_core.vectorstores import InMemoryVectorStore
 
 
 celery = Celery("secureblogs")
@@ -17,11 +21,28 @@ celery.conf.broker_url = f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}/{
 
 @celery.task(name="create_request")
 def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
-                   num_slides: int):
+                   num_slides: int, files: List[str]):
     db_work = SyncDBWork()
     db_work.update_obj(PresentationRequest, [{'field': PresentationRequest.id, 'value': request_id}],
                        {"status": RequestStatus.PROCESSING, "updated_at": datetime.datetime.utcnow()})
-    presentation_content = get_presentation_content_structured_2(theme=theme, num_slides=num_slides)
+    text_file = ''
+    doc_list = []
+    if files:
+
+        #TODO
+    # скачать файлы
+        for file in files:
+            doc = parse_file_in_document(file)
+            text_file += get_text_from_document(doc)
+            doc_list.append(doc)
+
+        embeddings = OllamaEmbeddings(model="bge-m3")
+        vector_store = InMemoryVectorStore(embeddings)
+        for doc in doc_list:
+            vector_store = create_vector_store(vector_store=vector_store, document=doc)
+
+    presentation_content = get_presentation_content_structured_2(theme=theme,
+                                                                 num_slides=num_slides, content=text_file)
     if presentation_content and isinstance(presentation_content, dict) and len(presentation_content.get('slides', {})):
         count = 1
         while count <= num_slides:
@@ -41,8 +62,12 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
     slides: List[Slide] = db_work.get_objects(Slide, [{"field": Slide.request_id, "value": request_id}],
                                  [Sort(desc=True, sort_value=Slide.created_at)])
     history = ""
+
     for n, slide in enumerate(slides, 1):
-        slide_content = get_slide_2(theme=theme, header=slide.slide_header, history=history)
+        content = ''
+        if files:
+            content = get_rag_context(vector_store, slide.slide_header)
+        slide_content = get_slide_2(theme=theme, header=slide.slide_header, history=history, context=content)
         slide_content = slide_content if slide_content else "pass"
         elements = [
             {
