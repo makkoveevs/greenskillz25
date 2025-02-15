@@ -3,6 +3,7 @@ import { Alert, Button, Flex, Typography } from "antd";
 import { observer } from "mobx-react-lite";
 import ProfileModel from "./model";
 import { Link, useNavigate } from "react-router-dom";
+import { ROUTES } from "src/shared/constants";
 
 const { Title, Text } = Typography;
 
@@ -46,7 +47,7 @@ export const Profile = observer((): React.JSX.Element => {
       <Button
         type="primary"
         onClick={() => {
-          navigate("/");
+          navigate(ROUTES.MAIN);
           keycloak.logout();
         }}>
         Выйти
