@@ -1,0 +1,42 @@
+html {
+  font-size: 16px;
+}
+
+body {
+  font-size: 1rem;
+}
+
+/* Для экранов шириной 600px и меньше */
+@media (max-width: 600px) {
+  html {
+    font-size: 10px;
+  }
+}
+
+/* Для экранов шириной от 601px до 1024px */
+@media (min-width: 601px) and (max-width: 1024px) {
+  html {
+    font-size: 10px;
+  }
+}
+
+/* Для экранов шириной от 1025px до 1440px */
+@media (min-width: 1025px) and (max-width: 1440px) {
+  html {
+    font-size: 12px;
+  }
+}
+
+/* Для экранов шириной более 1440px до 1920 */
+@media (min-width: 1441px) and (max-width: 1920px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+/* Для экранов шириной более 1440px до 1920 */
+@media (min-width: 1921px) {
+  html {
+    font-size: 16px;
+  }
+}

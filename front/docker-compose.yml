@@ -1,0 +1,17 @@
+version: "3.3"
+
+services:
+  frontend:
+    image:  front
+    container_name: front
+    restart: always
+    ports:
+      - 80:80
+    env_file:
+      - .env
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      TZ: "Europe/Moscow"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
