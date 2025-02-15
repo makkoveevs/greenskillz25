@@ -37,6 +37,6 @@ def create_vector_store(vector_store, document):
 
 
 def get_rag_context(vector_store, slide_header):
-    retrieved_docs = vector_store.similarity_search(slide_header)
+    retrieved_docs = vector_store.similarity_search(slide_header, k=3)
     docs_content = "\n\n".join(doc.page_content for doc in retrieved_docs)
     return docs_content

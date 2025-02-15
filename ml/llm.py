@@ -46,7 +46,10 @@ def get_presentation_content_structured(theme, num_slides = 5, content=""):
     model_with_structure = llm.with_structured_output(SlidesList)
     structured_output = model_with_structure.invoke(messages)
     
-    return structured_output.model_dump()
+    if structured_output:
+        return structured_output.model_dump()
+    else:
+        return {}
 
 
 def get_summary(context, num_slides=5):
