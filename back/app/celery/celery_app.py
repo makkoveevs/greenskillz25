@@ -54,7 +54,7 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
         count = 3
         while count <= num_slides + 2:
             slide = Slide(id=uuid.uuid4(), slide_num=count,
-                          slide_header=presentation_content.get('slides', {}).get(f'slide_{count}', ''),
+                          slide_header=presentation_content.get('slides', {}).get(f'slide_{count-2}', ''),
                           elements={}, request_id=request_id)
             db_work.create_obj(slide)
             count += 1
