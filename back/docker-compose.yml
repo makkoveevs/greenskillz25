@@ -1,0 +1,141 @@
+version: "3.9"
+
+services:
+  minio:
+    image: minio/minio:RELEASE.2023-12-23T07-19-11Z
+    command: server --console-address ":9001" /data
+    hostname: minio
+    restart: always
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_BROWSER_REDIRECT_URL: "http://minio:9001"
+      MINIO_PROMETHEUS_AUTH_TYPE: public
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    labels:
+      - "greenatom.tech.service.label=backend"
+      - "greenatom.tech.product.label=atom_oko"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 10s
+      timeout: 20s
+      retries: 3
+    volumes:
+      - ./volumes/minio-data:/data
+    networks:
+      - postgres
+    security_opt:
+      - no-new-privileges:true
+
+  postgres:
+    container_name: postgres_container
+    image: postgres:13.2-alpine
+    env_file: ".test.env"
+    environment:
+      PGDATA: /data/postgres
+    volumes:
+      - ./volumes/postgres:/data/postgres
+      - ./volumes/keycloak-db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U keycloak" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:20.0.5
+    command: "start --import-realm --http-port=8080"
+    ports:
+      - "${KC_PORT:-8080}:8080"
+    env_file: ".test.env"
+    volumes:
+      - ./volumes/keycloak-data:/opt/jboss/keycloak/data
+      - ./volumes/keycloak-data-opt:/opt/keycloak/data
+      - ./keycloak-realm.json:/opt/keycloak/data/import/realm.json
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - postgres
+
+  start_project:
+    container_name: start_project
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: greenskils_image
+    env_file:
+      - .env
+    ports:
+      - "8081:4000"
+    volumes:
+      - ./logs:/app/logs
+    command: [ "sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 4000" ]
+    depends_on:
+      postgres-app:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    networks:
+      - postgres
+    restart: always
+
+  celery_worker:
+    image: greenskils_image
+    container_name: celery_worker
+    restart: always
+    command: [ "celery", "-A", "app.celery.celery_app.celery", "worker", "--loglevel=info" ]
+    depends_on:
+      - redis
+    networks:
+      - postgres
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - postgres
+
+  postgres-app:
+    image: postgres:15
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./volumes/postgresql_app:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres2
+      POSTGRES_PASSWORD: greenskils
+      POSTGRES_DB: greenskils
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres2" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - postgres
+
+networks:
+  postgres:
+    driver: bridge
+
+volumes:
+  postgres:
+  keycloak-db-data:
