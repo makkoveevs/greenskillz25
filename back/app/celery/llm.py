@@ -74,7 +74,7 @@ def get_presentation_content_structured(theme, num_slides = 5, content=""):
         ans = structured_output.model_dump()
         try:
             for k,v in ans["slides"].items():
-                ans['slides']['k'] = remove_chinese(v)
+                ans['slides'][k] = remove_chinese(v.replace("\n", " ").replace("\r", ""))
         except:
             pass
         return ans
@@ -107,7 +107,7 @@ def get_slide(theme, header, history = "", context = ""):
     response = llm.invoke(messages)
     answer = response.content
 
-    return remove_chinese(answer)
+    return remove_chinese(answer.replace("\n", " ").replace("\r", ""))
 
 
 def update_slide(theme, header, text, added_text = ""):
