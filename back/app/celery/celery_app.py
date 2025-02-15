@@ -41,6 +41,10 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
 
     presentation_content = get_presentation_content_structured_2(theme=theme,
                                                                 num_slides=num_slides, content=text_file)
+    if not presentation_content:
+        presentation_content = get_presentation_content_structured_2(theme=theme,
+                                                                num_slides=num_slides, content="")
+
     if presentation_content and isinstance(presentation_content, dict) and len(presentation_content.get('slides', {})):
         count = 3
         while count <= num_slides + 2:
