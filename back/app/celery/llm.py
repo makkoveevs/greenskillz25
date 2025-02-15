@@ -3,21 +3,12 @@ import warnings
 warnings.filterwarnings('ignore')
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama import ChatOllama
-from app.celery.prompt import SLIDE_PROMPT, SLIDE_UPDATE, TITLE_PROMPT, SUMMARIZE_PROMPT
+from ml.prompt import SLIDE_PROMPT, SLIDE_UPDATE, TITLE_PROMPT, SUMMARIZE_PROMPT
 from pydantic import BaseModel, Field
 
 
 llm = ChatOllama(model="qwen2.5:14b", temperature=0.0)
 
-def get_slide_2(theme, header, history = "", context = ""):
-    return "agsdhjhagskdhakshdk PROMT"
-
-def get_presentation_content_structured_2(theme, num_slides = 5, content=""):
-    return {'slides': {'slide_1': 'Введение в Росатом',
-                'slide_2': 'История и развитие Росатома',
-                'slide_3': 'Основные направления деятельности Росатома',
-                'slide_4': 'Производственные мощности и инфраструктура',
-                'slide_5': 'Международное сотрудничество и экологические стандарты'}}
 
 # def get_presentation_content(theme, num_slides = 5):
 
@@ -45,17 +36,29 @@ class SlidesList(BaseModel):
 
 def get_presentation_content_structured(theme, num_slides = 5, content=""):
 
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system", TITLE_PROMPT),
-            ("user", "{theme}, {num_slides}, {content}"),
-        ]
-    )
-    messages = prompt.invoke({"theme": theme, "num_slides": num_slides, "content": content})
+    if content != "":
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", TITLE_PROMPT),
+                ("user", "{theme}, {num_slides}, {content}"),
+            ]
+        )
+        messages = prompt.invoke({"theme": theme, "num_slides": num_slides, "content": content})
+    else:
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", TITLE_PROMPT),
+                ("user", "{theme}, {num_slides}"),
+            ]
+        )
+        messages = prompt.invoke({"theme": theme, "num_slides": num_slides})
     model_with_structure = llm.with_structured_output(SlidesList)
     structured_output = model_with_structure.invoke(messages)
     
-    return structured_output.model_dump()
+    if structured_output:
+        return structured_output.model_dump()
+    else:
+        return {}
 
 
 def get_summary(context, num_slides=5):
