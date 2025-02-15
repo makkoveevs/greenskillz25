@@ -153,11 +153,13 @@ async def update_presentation(
     for slide in presentation_data.slides:
         if slide.id in new_slides:
             header = [i.get('content', '') for i in slide.elements if i.get("text_type", '') == 'header']
+            header = header[0] if header else ''
             x = SlideModel(id=slide.id, slide_num=slide.slide_number,
                             slide_header=header, elements=slide.elements, request_id=presentation_obj.request_id)
             await db_work.create(x)
         else:
             header = [i.get('content', '') for i in slide.elements if i.get("text_type", '') == 'header']
+            header = header[0] if header else ''
             await db_work.update_obj(SlideModel, [{'field': SlideModel.id, 'value': slide.id}],
                                      {"slide_num": slide.slide_number, "slide_header": header,
                                       "elements": slide.elements})
