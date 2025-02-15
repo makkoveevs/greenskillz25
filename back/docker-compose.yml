@@ -103,8 +103,6 @@ services:
       - redis
     networks:
       - postgres
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
   redis:
     image: redis:latest
@@ -137,10 +135,6 @@ services:
 networks:
   postgres:
     driver: bridge
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.28.0.0/16
 
 volumes:
   postgres:
