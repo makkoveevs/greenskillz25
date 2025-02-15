@@ -45,3 +45,7 @@ class PresentationsResultGet(BaseModel):
     status: str
     request_id: uuid.UUID
     slides: List[Slide]
+
+
+class PresentationsResultPatch(BaseModel):
+    slides: List[Slide]

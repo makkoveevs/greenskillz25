@@ -12,7 +12,7 @@ from app.schemas.auth_schemas import UserKeycloak
 from app.schemas.presentations_schema import (
     PresentationsRequestFile,
     PresentationsRequest, PresentationsRequestResponse,
-    PresentationsRequestResponseCompleted, PresentationsResultGet, Slide
+    PresentationsRequestResponseCompleted, PresentationsResultGet, Slide, PresentationsResultPatch
 )
 from app.core.postgres import DBWork, Sort
 from app.models.models import (
@@ -129,26 +129,38 @@ async def get_presentation(
     )
 
 
-# @router.patch("/presentation/{presentation_id}")
-# async def update_presentation(
-#         presentation_id: uuid.UUID,
-#         presentation_data: PresentationsResultPatch,
-#         user: UserKeycloak = Depends(keycloak_client.get_current_user),
-#         db_work: DBWork = Depends(get_db_work)
-# ):
-#     presentation_obj: PresentationResultModel = await db_work.get_one_obj(
-#         PresentationResultModel,
-#         {'id': presentation_id}
-#     )
-#     if not presentation_obj:
-#         raise error_dict.get(ErrorName.DoesNotExist)
-#     if settings.DEFAULT_ADMIN_GROUP not in user.groups:
-#         if str(presentation_obj.user_id) != str(user.sub):
-#             raise error_dict.get(ErrorName.Forbidden)
-#     presentation_obj.title = presentation_data.title
-#     presentation_obj.content = presentation_data.content
-#     presentation_obj.updated_at = datetime.datetime.utcnow()
-#     await db_work.save_obj()
+@router.patch("/presentation/{presentation_id}")
+async def update_presentation(
+        presentation_id: uuid.UUID,
+        presentation_data: PresentationsResultPatch,
+        # user: UserKeycloak = Depends(keycloak_client.get_current_user),
+        db_work: DBWork = Depends(get_db_work)
+):
+    user = UserKeycloak(email_verified=False, groups=[], preferred_username="default", sub=user_id_default)
+    presentation_obj: PresentationResultModel = await db_work.get_one_obj(
+        PresentationResultModel,
+        {'id': presentation_id}
+    )
+    if not presentation_obj:
+        raise error_dict.get(ErrorName.DoesNotExist)
+    if settings.DEFAULT_ADMIN_GROUP not in user.groups:
+        if str(presentation_obj.user_id) != str(user.sub):
+            raise error_dict.get(ErrorName.Forbidden)
+    slide_ids = [i.id for i in presentation_data.slides]
+    db_slides = await db_work.select_only_fields(SlideModel, [{'field': SlideModel.id, 'value': slide_ids}], ['id'], False)
+    db_slides = set([i['id'] for i in db_slides])
+    new_slides = set(slide_ids) - db_slides
+    for slide in presentation_data.slides:
+        if slide.id in new_slides:
+            header = [i.get('content', '') for i in slide.elements if i.get("text_type", '') == 'header']
+            x = SlideModel(id=slide.id, slide_num=slide.slide_number,
+                            slide_header=header, elements=slide.elements, request_id=presentation_obj.request_id)
+            await db_work.create(x)
+        else:
+            header = [i.get('content', '') for i in slide.elements if i.get("text_type", '') == 'header']
+            await db_work.update_obj(SlideModel, [{'field': SlideModel.id, 'value': slide.id}],
+                                     {"slide_num": slide.slide_number, "slide_header": header,
+                                      "elements": slide.elements})
 
 
 @router.delete("/request/{request_id}")
