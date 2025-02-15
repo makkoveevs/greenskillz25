@@ -112,7 +112,7 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
             "x": 0.1,
             "y": 0.1,
         })
-    slide_2 = Slide(id=uuid.uuid4(), slide_num=2, slide_header=theme, elements=elements_2,
+    slide_2 = Slide(id=uuid.uuid4(), slide_num=2, slide_header="Оглавление", elements=elements_2,
                     request_id=request_id)
     db_work.create_obj(slide_2)
 
