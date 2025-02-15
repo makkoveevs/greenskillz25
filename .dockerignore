@@ -1,0 +1,14 @@
+test_data
+visual_results
+
+*.git
+*.cache
+*.vscode
+*__pycache__
+*.dockerignore
+*.gitignore
+*.ipynb
+Dockerfile*
+*compose.yml
+/rmq
+*.pptx
