@@ -33,7 +33,7 @@ async def protected_route(db_work: DBWork = Depends(get_db_work)):
         theme=i.get("theme"),
         status=i.get("status")
     ) for i in presentation_list]
-    return MyPresentationsRequestList(presentation_list=presentation_list)
+    return MyPresentationsRequestList(username=user.preferred_username, presentation_list=presentation_list)
 
 
 @router.post("/register")
