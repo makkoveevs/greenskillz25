@@ -15,8 +15,8 @@ class Settings(BaseSettings):
     KEYCLOAK_REALM: str = "myrealm"
     KEYCLOAK_CLIENT_ID: str = "myclient"
     KEYCLOAK_CLIENT_SECRET: str = "tvs42AmYAG31vcGVPDIHZsUr4nM4CB3B"
-    KEYCLOAK_ADMIN: str = "admin"
-    KEYCLOAK_ADMIN_PASSWORD: str = "admin"
+    KEYCLOAK_ADMIN: str = "erroradmin"
+    KEYCLOAK_ADMIN_PASSWORD: str = "erroradmin"
 
     DEFAULT_ADMIN_GROUP: str = "admins"
 
