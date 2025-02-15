@@ -57,11 +57,13 @@ class SyncDBWork:
             query = query.values(**values)
             db.execute(query)
             db.commit()
+            db.close()
 
     def create_obj(self, obj):
         with SyncSessionLocal() as db:
             db.add(obj)
             db.commit()
+            db.close()
 
     def get_objects(self, model, filter_dict, sort):
         with SyncSessionLocal() as db:
@@ -73,5 +75,7 @@ class SyncDBWork:
             query = query.filter(and_(*filters))
             if sort:
                 query = self.sort_query(query, sort)
+            x = (db.execute(query)).scalars().all()
             db.commit()
-            return (db.execute(query)).scalars().all()
+            db.close()
+            return x
