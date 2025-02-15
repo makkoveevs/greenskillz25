@@ -138,3 +138,7 @@ yarl==1.9.4
 zipp==3.20.2
 langchain
 langchain_ollama
+langchain_community
+langchain_unstructured
+unstructured[all-docs]
+onnx==1.16.1
