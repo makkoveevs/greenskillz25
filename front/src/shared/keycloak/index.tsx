@@ -1,0 +1,1 @@
+export { KCProvider } from "./keycloakProvider";
