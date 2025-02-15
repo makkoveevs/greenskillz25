@@ -45,7 +45,7 @@ async def create_request(
         s3_client: MinioClient = Depends(get_minio_client),
         db_work: DBWork = Depends(get_db_work)
 ):
-    user: UserKeycloak(email_verified=False, groups=[], preferred_username="default", sub=user_id_default)
+    user = UserKeycloak(email_verified=False, groups=[], preferred_username="default", sub=user_id_default)
     files = files.new_files if len(files.new_files) > 0 else None
     presentation_request = PresentationRequestModel(
         id=uuid.uuid4(),
@@ -73,7 +73,7 @@ async def get_request(
         request_id: uuid.UUID,
         db_work: DBWork = Depends(get_db_work)
 ):
-    user: UserKeycloak(email_verified=False, groups=[], preferred_username="default", sub=user_id_default)
+    user = UserKeycloak(email_verified=False, groups=[], preferred_username="default", sub=user_id_default)
     request_obj: PresentationRequestModel = await db_work.get_one_obj(PresentationRequestModel, {'id': request_id})
     if not request_obj:
         raise error_dict.get(ErrorName.DoesNotExist)
@@ -101,7 +101,7 @@ async def get_presentation(
         presentation_id: uuid.UUID,
         db_work: DBWork = Depends(get_db_work)
 ):
-    user: UserKeycloak(email_verified=False, groups=[], preferred_username="default", sub=user_id_default)
+    user = UserKeycloak(email_verified=False, groups=[], preferred_username="default", sub=user_id_default)
     presentation_obj: PresentationResultModel = await db_work.get_one_obj(
         PresentationResultModel,
         {'id': presentation_id}
@@ -156,7 +156,7 @@ async def delete_presentation(
         presentation_id: uuid.UUID,
         db_work: DBWork = Depends(get_db_work)
 ):
-    user: UserKeycloak(email_verified=False, groups=[], preferred_username="default", sub=user_id_default)
+    user = UserKeycloak(email_verified=False, groups=[], preferred_username="default", sub=user_id_default)
     presentation_obj: PresentationResultModel = await db_work.get_one_obj(
         PresentationResultModel,
         {'id': presentation_id}
