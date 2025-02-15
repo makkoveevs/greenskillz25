@@ -1,0 +1,1 @@
+export { StyledLogo } from "./StyledLogo";
