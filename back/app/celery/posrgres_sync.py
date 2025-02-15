@@ -1,7 +1,8 @@
-from typing import Union
+from typing import Union, Any, List
 
+from pydantic import BaseModel
 from sqlalchemy import update, create_engine
-from sqlalchemy.sql import and_
+from sqlalchemy.sql import and_, select
 from sqlalchemy.orm import sessionmaker
 
 from app.models.models import PresentationRequest, RequestStatus
@@ -13,6 +14,10 @@ SyncSessionLocal = sessionmaker(
     autoflush=False,
     bind=sync_engine,
 )
+
+class Sort(BaseModel):
+    desc: bool
+    sort_value: Any
 
 
 class SyncDBWork:
@@ -33,10 +38,19 @@ class SyncDBWork:
                 filters.append(getattr(model, column_name) == column_value)
         return filters
 
+    @staticmethod
+    def sort_query(query, sort_list: List[Sort]):
+        for sort in sort_list:
+            if sort.desc:
+                query = query.order_by(sort.sort_value.desc())
+            else:
+                query = query.order_by(sort.sort_value)
+        return query
+
     def update_obj(self, model, filter_dict, values):
         with SyncSessionLocal() as db:
             # update post instance
-            query = update(PresentationRequest)
+            query = update(model)
             if filter_dict:
                 filters = self.create_filter(model, filter_dict)
             query = query.filter(and_(*filters))
@@ -48,3 +62,15 @@ class SyncDBWork:
         with SyncSessionLocal() as db:
             db.add(obj)
             db.commit()
+
+    def get_objects(self, model, filter_dict, sort):
+        with SyncSessionLocal() as db:
+            query = select(model)
+
+            filters = []
+            if filter_dict:
+                filters = self.create_filter(model, filter_dict)
+            query = query.filter(and_(*filters))
+            if sort:
+                query = self.sort_query(query, sort)
+            return (db.execute(query)).scalars().all()

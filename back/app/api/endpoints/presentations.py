@@ -4,20 +4,20 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Form, status
 from pydantic import ValidationError
 from fastapi.encoders import jsonable_encoder
-from typing import Union
+from typing import Union, List
 
 from app.api.deps import keycloak_client, get_db_work, get_minio_client
 from app.core.minio_client import MinioClient
 from app.schemas.auth_schemas import UserKeycloak
 from app.schemas.presentations_schema import (
     PresentationsRequestFile,
-    PresentationsRequest, PresentationsRequestResponse, PresentationsResultPatch,
-    PresentationsRequestResponseCompleted, PresentationsResultGet,
+    PresentationsRequest, PresentationsRequestResponse,
+    PresentationsRequestResponseCompleted, PresentationsResultGet, Slide
 )
-from app.core.postgres import DBWork
+from app.core.postgres import DBWork, Sort
 from app.models.models import (
     PresentationRequest as PresentationRequestModel, RequestStatus,
-    PresentationResult as PresentationResultModel
+    PresentationResult as PresentationResultModel, Slide as SlideModel
 )
 from app.core.config import settings
 from app.core.error_config import error_dict, ErrorName
@@ -55,12 +55,14 @@ async def create_request(
     )
     if file:
         file_path = await file_utils.upload_files(file, presentation_request.id, s3_client)
-        presentation_request
     await db_work.create(presentation_request)
-    celery_create_request.delay(request_id=presentation_request.id, theme=request_data.theme, user_id=user.sub)
-    return PresentationsRequestResponse(
+    celery_create_request.delay(request_id=presentation_request.id, theme=request_data.theme,
+                                user_id=user.sub, num_slides=request_data.count_slides)
+    return PresentationsRequestResponseCompleted(
+        presentation_id=None,
         request_id=presentation_request.id,
-        status=presentation_request.status
+        status=presentation_request.status,
+        theme=presentation_request.theme
     )
 
 
@@ -79,38 +81,50 @@ async def get_request(
     if request_obj.status != RequestStatus.COMPLETED:
         return PresentationsRequestResponse(
             request_id=request_obj.id,
-            status=request_obj.status
+            status=request_obj.status,
+            theme=request_obj.theme
         )
     else:
         presentation_obj: PresentationResultModel = await db_work.get_one_obj(PresentationResultModel, {'request_id': request_obj.id})
         return PresentationsRequestResponseCompleted(
             presentation_id=presentation_obj.id if presentation_obj else None,
             request_id=request_obj.id,
-            status=request_obj.status
+            status=request_obj.status,
+            theme=request_obj.theme
         )
 
 
-# @router.get("/presentation/{presentation_id}")
-# async def get_presentation(
-#         presentation_id: uuid.UUID,
-#         user: UserKeycloak = Depends(keycloak_client.get_current_user),
-#         db_work: DBWork = Depends(get_db_work)
-# ):
-#     presentation_obj: PresentationResultModel = await db_work.get_one_obj(
-#         PresentationResultModel,
-#         {'id': presentation_id}
-#     )
-#     if not presentation_obj:
-#         raise error_dict.get(ErrorName.DoesNotExist)
-#     if settings.DEFAULT_ADMIN_GROUP not in user.groups:
-#         if str(presentation_obj.user_id) != str(user.sub):
-#             raise error_dict.get(ErrorName.Forbidden)
-#     return PresentationsResultGet(
-#         presentation_id=presentation_obj.id,
-#         title=presentation_obj.title,
-#         content=presentation_obj.content,
-#         created_at=presentation_obj.created_at
-#     )
+@router.get("/presentation/{presentation_id}")
+async def get_presentation(
+        presentation_id: uuid.UUID,
+        user: UserKeycloak = Depends(keycloak_client.get_current_user),
+        db_work: DBWork = Depends(get_db_work)
+):
+    presentation_obj: PresentationResultModel = await db_work.get_one_obj(
+        PresentationResultModel,
+        {'id': presentation_id}
+    )
+    if not presentation_obj:
+        raise error_dict.get(ErrorName.DoesNotExist)
+    if settings.DEFAULT_ADMIN_GROUP not in user.groups:
+        if str(presentation_obj.user_id) != str(user.sub):
+            raise error_dict.get(ErrorName.Forbidden)
+
+    slides: List[SlideModel] = await db_work.get_objects(SlideModel,
+                                       [{"field": SlideModel.request_id, "value": presentation_obj.request_id}],
+                                       sort=[Sort(desc=True, sort_value=SlideModel.slide_num)])
+    slides = [Slide(id=i.id, slide_number=i.slide_num, elements=i.elements) for i in slides]
+
+    request = await db_work.get_one_obj(PresentationRequestModel,
+                                        [{'field': PresentationResultModel.request_id, 'value': presentation_obj.request_id}])
+
+    return PresentationsResultGet(
+        presentation_id=presentation_obj.id,
+        theme=presentation_obj.theme,
+        status=request.status,
+        request_id=presentation_obj.request_id,
+        slides=slides
+    )
 
 
 # @router.patch("/presentation/{presentation_id}")
