@@ -12,7 +12,13 @@ from langchain_unstructured import UnstructuredLoader
 
 
 def parse_file_in_document(file):
-    loader = UnstructuredLoader(file)
+    loader = UnstructuredLoader(
+        file,
+        chunking_strategy="by_title",
+        max_characters=1024,
+        overlap=128,
+        combine_text_under_n_chars=128
+    )
     document = loader.load()
     return document
 
@@ -26,13 +32,13 @@ def get_text_from_document(document):
 
 
 def create_vector_store(vector_store, document):
-    r_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=4048,
-        chunk_overlap=256,
-        separators=["\n\n", "\n", "(?<=\. )", " ", ""]
-    )
-    chunks = r_splitter.split_documents(document)
-    _ = vector_store.add_documents(documents=chunks)
+    # r_splitter = RecursiveCharacterTextSplitter(
+    #     chunk_size=4048,
+    #     chunk_overlap=256,
+    #     separators=["\n\n", "\n", "(?<=\. )", " ", ""]
+    # )
+    # chunks = r_splitter.split_documents(document)
+    _ = vector_store.add_documents(documents=document)
     return vector_store
 
 
