@@ -29,6 +29,7 @@ class PresentationsRequestResponseCompleted(PresentationsRequestResponse):
 
 
 class MyPresentationsRequestList(BaseModel):
+    username: str
     presentation_list: List[PresentationsRequestResponseCompleted]
 
 
