@@ -10,6 +10,7 @@ from app.celery.posrgres_sync import SyncDBWork, Sort
 from app.core.config import settings
 from app.celery.llm import get_presentation_content_structured_2, get_slide_2
 from app.celery.rag import parse_file_in_document, get_text_from_document, create_vector_store, get_rag_context
+from app.celery.minio_sync import download_file
 
 from langchain_ollama import OllamaEmbeddings
 from langchain_core.vectorstores import InMemoryVectorStore
@@ -30,6 +31,7 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
     if files:
 
         for file in files:
+            download_file(file, f'docs/{file.split("/")[-1]}')
             doc = parse_file_in_document(file)
             text_file += get_text_from_document(doc)
             doc_list.append(doc)

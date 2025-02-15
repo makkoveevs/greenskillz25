@@ -45,7 +45,7 @@ async def create_request(
         s3_client: MinioClient = Depends(get_minio_client),
         db_work: DBWork = Depends(get_db_work)
 ):
-    files = file.new_files if len(files.new_files) > 0 else None
+    files = files.new_files if len(files.new_files) > 0 else None
     presentation_request = PresentationRequestModel(
         id=uuid.uuid4(),
         user_id=user.sub,
