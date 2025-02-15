@@ -99,8 +99,6 @@ services:
     container_name: celery_worker
     restart: always
     command: [ "celery", "-A", "app.celery.celery_app.celery", "worker", "--loglevel=info" ]
-    ports:
-        - "11434:11434"
     depends_on:
       - redis
     networks:
