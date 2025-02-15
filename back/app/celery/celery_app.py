@@ -29,8 +29,6 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
     doc_list = []
     if files:
 
-        #TODO
-    # скачать файлы
         for file in files:
             doc = parse_file_in_document(file)
             text_file += get_text_from_document(doc)
@@ -42,7 +40,7 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
             vector_store = create_vector_store(vector_store=vector_store, document=doc)
 
     presentation_content = get_presentation_content_structured(theme=theme,
-                                                                 num_slides=num_slides, content=text_file)
+                                                                num_slides=num_slides, content=text_file)
     if presentation_content and isinstance(presentation_content, dict) and len(presentation_content.get('slides', {})):
         count = 1
         while count <= num_slides:
@@ -75,14 +73,22 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
               "alignment": "center", # left, right, center, justify
               "style": "bold", # regular, bold, italic
               "size": 48,
-              "content": slide.slide_header
+              "content": slide.slide_header,
+                "w": 0,
+                "h": 0,
+                "x": 0,
+                "y": 0,
             },
             {
               "text_type": "regular",
               "alignment": "left",
               "style": "regular",
               "size": 24,
-              "content": slide_content
+              "content": slide_content,
+                "w": 0,
+                "h": 0,
+                "x": 0,
+                "y": 0,
             }
         ]
         slide.elements = elements

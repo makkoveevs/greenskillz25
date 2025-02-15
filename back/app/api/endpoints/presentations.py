@@ -150,24 +150,24 @@ async def get_presentation(
 #     await db_work.save_obj()
 
 
-# @router.delete("/presentation/{presentation_id}")
-# async def delete_presentation(
-#         presentation_id: uuid.UUID,
-#         user: UserKeycloak = Depends(keycloak_client.get_current_user),
-#         db_work: DBWork = Depends(get_db_work)
-# ):
-#     presentation_obj: PresentationResultModel = await db_work.get_one_obj(
-#         PresentationResultModel,
-#         {'id': presentation_id}
-#     )
-#     if not presentation_obj:
-#         raise error_dict.get(ErrorName.DoesNotExist)
-#     if settings.DEFAULT_ADMIN_GROUP not in user.groups:
-#         if str(presentation_obj.user_id) != str(user.sub):
-#             raise error_dict.get(ErrorName.Forbidden)
-#     await db_work.delete_obj(PresentationRequestModel, {'id': presentation_obj.request_id})
-#     await db_work.delete_obj(PresentationHistoryModel, {'id': presentation_id})
-#     await db_work.delete_obj(PresentationResultModel, {'id': presentation_id})
-#     return {
-#         "message": "Presentation deleted successfully"
-#     }
+@router.delete("/presentation/{presentation_id}")
+async def delete_presentation(
+        presentation_id: uuid.UUID,
+        user: UserKeycloak = Depends(keycloak_client.get_current_user),
+        db_work: DBWork = Depends(get_db_work)
+):
+    presentation_obj: PresentationResultModel = await db_work.get_one_obj(
+        PresentationResultModel,
+        {'id': presentation_id}
+    )
+    if not presentation_obj:
+        raise error_dict.get(ErrorName.DoesNotExist)
+    if settings.DEFAULT_ADMIN_GROUP not in user.groups:
+        if str(presentation_obj.user_id) != str(user.sub):
+            raise error_dict.get(ErrorName.Forbidden)
+    await db_work.delete_obj(PresentationRequestModel, {'id': presentation_obj.request_id})
+    await db_work.delete_obj(PresentationResultModel, {'id': presentation_id})
+    await db_work.delete_obj(SlideModel, {'id': presentation_obj.request_id})
+    return {
+        "message": "Presentation deleted successfully"
+    }
