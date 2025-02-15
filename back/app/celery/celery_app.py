@@ -117,6 +117,7 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
         content = ''
         if files:
             content = get_rag_context(vector_store, slide.slide_header)
+        print(f'------------{slide.slide_header}')
         slide_content = get_slide(theme=theme, header=slide.slide_header, history=history, context=content)
         slide_content = slide_content if slide_content else "pass"
         elements = [
