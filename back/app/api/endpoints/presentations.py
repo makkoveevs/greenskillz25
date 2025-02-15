@@ -26,7 +26,7 @@ from app.utils import files as file_utils
 
 router = APIRouter()
 
-user_id_default = "a28a223c-61a3-4a4e-87cb-77cfdd979b85"
+user_id_default = settings.get_default_user
 
 def checker(data: str = Form(...)):
     try:

@@ -37,6 +37,10 @@ class Settings(BaseSettings):
         env_file = "./.env"
 
     @property
+    def get_default_user(self):
+        return "a28a223c-61a3-4a4e-87cb-77cfdd979b85"
+
+    @property
     def pg_conn(self) -> str:
         postgres_dsn = PostgresDsn(
             f"postgresql+asyncpg://{self.SERVICE_PG_USER}:{self.SERVICE_PG_PASSWORD}@{self.SERVICE_PG_HOST}:{self.SERVICE_PG_PORT}/{self.SERVICE_PG_DB}"
