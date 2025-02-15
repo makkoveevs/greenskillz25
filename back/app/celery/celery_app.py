@@ -149,7 +149,7 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
         slide.elements = elements
         history += slide_content
         db_work.update_obj(Slide, [{'field': Slide.id, 'value': slide.id}],
-                           {"elements": elements, "updated_at": datetime.datetime.utcnow()})
+                           {'slide_header': slide.slide_header, "elements": elements, "updated_at": datetime.datetime.utcnow()})
     db_work.update_obj(PresentationRequest, [{'field': PresentationRequest.id, 'value': request_id}],
                        {"status": RequestStatus.COMPLETED, "updated_at": datetime.datetime.utcnow()})
 
