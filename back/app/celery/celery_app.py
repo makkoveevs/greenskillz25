@@ -63,7 +63,7 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
     else:
         db_work.update_obj(PresentationRequest, [{'field': PresentationRequest.id, 'value': request_id}],
                            {"status": RequestStatus.FAILED, "updated_at": datetime.datetime.utcnow()})
-        return
+    return
 
     slides: List[Slide] = db_work.get_objects(Slide, [{"field": Slide.request_id, "value": request_id}],
                                  [Sort(desc=False, sort_value=Slide.created_at)])
