@@ -79,13 +79,15 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
             "content": theme,
             "w": 0,
             "h": 0,
-            "x": 0,
-            "y": 0,
+            "x": 0.1,
+            "y": 0.1,
         }
     ],
                     request_id=request_id)
     db_work.create_obj(slide_1)
-    elements_2 = [{
+    elements_2 = []
+    for n, i in enumerate(slides, 0):
+        elements_2.append({
             "id": str(uuid.uuid4()),
             "text_type": "regular",  # regular, header, list
             "alignment": "center",  # left, right, center, justify
@@ -94,9 +96,10 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
             "content": i.slide_header,
             "w": 0,
             "h": 0,
-            "x": 0,
-            "y": 0,
-        } for i in slides]
+            "x": 0.1,
+            "y": 0.95 if 0.3+n*0.6/len(slides) >= 1 else 0.3+n*0.6/len(slides),
+        })
+
     elements_2.insert(0, {
             "id": str(uuid.uuid4()),
             "text_type": "header",  # regular, header, list
@@ -106,8 +109,8 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
             "content": "Оглавление",
             "w": 0,
             "h": 0,
-            "x": 0,
-            "y": 0,
+            "x": 0.1,
+            "y": 0.1,
         })
     slide_2 = Slide(id=uuid.uuid4(), slide_num=2, slide_header=theme, elements=elements_2,
                     request_id=request_id)
@@ -130,8 +133,8 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
               "content": slide.slide_header,
                 "w": 0,
                 "h": 0,
-                "x": 0,
-                "y": 0,
+                "x": 0.1,
+                "y": 0.1,
             },
             {
                 "id": str(uuid.uuid4()),
@@ -142,8 +145,8 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
               "content": slide_content,
                 "w": 0,
                 "h": 0,
-                "x": 0,
-                "y": 0,
+                "x": 0.1,
+                "y": 0.3,
             }
         ]
         slide.elements = elements

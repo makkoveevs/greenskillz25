@@ -73,4 +73,5 @@ class SyncDBWork:
             query = query.filter(and_(*filters))
             if sort:
                 query = self.sort_query(query, sort)
+            db.commit()
             return (db.execute(query)).scalars().all()
