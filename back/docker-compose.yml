@@ -157,6 +157,7 @@ services:
       - OLLAMA_HOST=0.0.0.0
       - OLLAMA_ORIGINS=http://0.0.0.0:11434
       - LLM_MODEL_VERSION=qwen2.5:14b
+      - EMBED_MODEL_VERSION=bge-m3
     entrypoint: ["/bin/bash", "/ollama_entrypoint.sh"] 
     networks:
       - postgres

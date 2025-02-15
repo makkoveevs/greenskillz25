@@ -18,4 +18,14 @@ else
   echo "Model $MODEL_NAME is ready!"
 fi
 
+MODEL_NAME=${EMBED_MODEL_VERSION}
+
+if ollama list | grep -q "$MODEL_NAME"; then
+  echo "Model $MODEL_NAME already available."
+else
+  echo "Retrieving model: $MODEL_NAME"
+  ollama pull "$MODEL_NAME"
+  echo "Model $MODEL_NAME is ready!"
+fi
+
 wait $pid
