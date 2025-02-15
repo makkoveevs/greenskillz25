@@ -49,7 +49,9 @@ class Slide(Base):
     slide_header: Mapped[str]
     elements = Column(JSONB, nullable=True)
     request_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("presentation_request.id", ondelete="CASCADE"),
-                                                  nullable=False, unique=True)
+                                                  nullable=False)
+    created_at: Mapped[created_at]
+    updated_at: Mapped[updated_at]
 
 
 class PresentationResult(Base):

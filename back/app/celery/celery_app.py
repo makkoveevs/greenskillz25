@@ -1,12 +1,14 @@
 import datetime
 import time
 import uuid
+from typing import List
 
 from celery import Celery
 
-from app.models.models import PresentationRequest, RequestStatus, PresentationResult
-from app.celery.posrgres_sync import SyncDBWork
+from app.models.models import PresentationRequest, RequestStatus, PresentationResult, Slide
+from app.celery.posrgres_sync import SyncDBWork, Sort
 from app.core.config import settings
+from app.celery.llm import get_presentation_content_structured_2, get_slide_2
 
 
 celery = Celery("secureblogs")
@@ -14,15 +16,56 @@ celery.conf.broker_url = f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}/{
 
 
 @celery.task(name="create_request")
-def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID):
-    # generate temp key and encrypt content
+def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
+                   num_slides: int):
     db_work = SyncDBWork()
     db_work.update_obj(PresentationRequest, [{'field': PresentationRequest.id, 'value': request_id}],
                        {"status": RequestStatus.PROCESSING, "updated_at": datetime.datetime.utcnow()})
-    print('sleep')
-    time.sleep(10)
-    presentation_obj = PresentationResult(id=uuid.uuid4(), theme=theme, request_id=request_id, user_id=user_id)
-    db_work.create_obj(presentation_obj)
-    print("wake up!")
+    presentation_content = get_presentation_content_structured_2(theme=theme, num_slides=num_slides)
+    if presentation_content and isinstance(presentation_content, dict) and len(presentation_content.get('slides', {})):
+        count = 1
+        while count <= num_slides:
+            slide = Slide(id=uuid.uuid4(), slide_num=count,
+                          slide_header=presentation_content.get('slides', {}).get(f'slide_{count}', ''),
+                          elements={}, request_id=request_id)
+            db_work.create_obj(slide)
+            count += 1
+            print(count)
+        presentation_obj = PresentationResult(id=uuid.uuid4(), theme=theme, request_id=request_id, user_id=user_id)
+        db_work.create_obj(presentation_obj)
+    else:
+        db_work.update_obj(PresentationRequest, [{'field': PresentationRequest.id, 'value': request_id}],
+                           {"status": RequestStatus.FAILED, "updated_at": datetime.datetime.utcnow()})
+        return
+
+    slides: List[Slide] = db_work.get_objects(Slide, [{"field": Slide.request_id, "value": request_id}],
+                                 [Sort(desc=True, sort_value=Slide.created_at)])
+    history = ""
+    for n, slide in enumerate(slides, 1):
+        slide_content = get_slide_2(theme=theme, header=slide.slide_header, history=history)
+        slide_content = slide_content if slide_content else "pass"
+        elements = [
+            {
+              "text_type": "header", # regular, header, list
+              "alignment": "center", # left, right, center, justify
+              "style": "bold", # regular, bold, italic
+              "size": 48,
+              "content": slide.slide_header
+            },
+            {
+              "text_type": "regular",
+              "alignment": "left",
+              "style": "regular",
+              "size": 24,
+              "content": slide_content
+            }
+        ]
+        slide.elements = elements
+        history += slide_content
+        db_work.update_obj(Slide, [{'field': Slide.id, 'value': slide.id}],
+                           {"elements": elements, "updated_at": datetime.datetime.utcnow()})
     db_work.update_obj(PresentationRequest, [{'field': PresentationRequest.id, 'value': request_id}],
                        {"status": RequestStatus.COMPLETED, "updated_at": datetime.datetime.utcnow()})
+
+
+

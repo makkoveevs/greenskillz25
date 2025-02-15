@@ -32,20 +32,15 @@ class MyPresentationsRequestList(BaseModel):
     presentation_list: List[PresentationsRequestResponseCompleted]
 
 
-class PresentationsResult(BaseModel):
-    presentation_id: uuid.UUID
-    title: Union[str, None]
-
-
-class PresentationsResultGet(PresentationsResult):
-    presentation_id: uuid.UUID
-    created_at: datetime.datetime
-
-
-class PresentationsResultPatch(PresentationsResult):
-    pass
-
-
 class Slide(BaseModel):
-    title: str
+    id: uuid.UUID
+    slide_number: int
+    elements: Union[list, dict]
 
+
+class PresentationsResultGet(BaseModel):
+    presentation_id: uuid.UUID
+    theme: Union[str, None]
+    status: str
+    request_id: uuid.UUID
+    slides: List[Slide]
