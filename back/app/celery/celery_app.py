@@ -8,7 +8,7 @@ from celery import Celery
 from app.models.models import PresentationRequest, RequestStatus, PresentationResult, Slide
 from app.celery.posrgres_sync import SyncDBWork, Sort
 from app.core.config import settings
-from app.celery.llm import get_presentation_content_structured_2, get_slide_2
+from app.celery.llm import get_presentation_content_structured, get_slide
 from app.celery.rag import parse_file_in_document, get_text_from_document, create_vector_store, get_rag_context
 
 from langchain_ollama import OllamaEmbeddings
@@ -41,7 +41,7 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
         for doc in doc_list:
             vector_store = create_vector_store(vector_store=vector_store, document=doc)
 
-    presentation_content = get_presentation_content_structured_2(theme=theme,
+    presentation_content = get_presentation_content_structured(theme=theme,
                                                                  num_slides=num_slides, content=text_file)
     if presentation_content and isinstance(presentation_content, dict) and len(presentation_content.get('slides', {})):
         count = 1
@@ -67,7 +67,7 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
         content = ''
         if files:
             content = get_rag_context(vector_store, slide.slide_header)
-        slide_content = get_slide_2(theme=theme, header=slide.slide_header, history=history, context=content)
+        slide_content = get_slide(theme=theme, header=slide.slide_header, history=history, context=content)
         slide_content = slide_content if slide_content else "pass"
         elements = [
             {
