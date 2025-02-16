@@ -129,6 +129,7 @@ class Api {
         link.setAttribute("download", "presentation.pptx");
         document.body.appendChild(link);
         link.click();
+        link.remove();
         return response;
       })
       .catch(() => Promise.reject());
