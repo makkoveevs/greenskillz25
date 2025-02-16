@@ -1,10 +1,20 @@
-import { Button, Carousel, Flex, Modal, Typography } from "antd";
+import {
+  Button,
+  Carousel,
+  Flex,
+  Modal,
+  Tooltip,
+  Typography,
+  Input
+} from "antd";
 import { ToolsStyled } from "./styles";
 import { observer } from "mobx-react-lite";
 import Model from "src/stores";
 import { useState } from "react";
 import { API_SOURCE } from "src/shared/constants";
+import { DislikeOutlined } from "@ant-design/icons";
 const { Title } = Typography;
+const { TextArea } = Input;
 
 export const Tools = observer((): JSX.Element => {
   const {
@@ -13,11 +23,30 @@ export const Tools = observer((): JSX.Element => {
     addTitle,
     addText,
     savePresentation,
-    exportPresentation
+    exportPresentation,
+    currentPresentation,
+    regenerateSlide
   } = Model;
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const [regenData, setRegenData] = useState<string>("");
+  const [isRegenerateModalOpen, setIsRegenerateModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const showRegenerateModal = () => {
+    setIsRegenerateModalOpen(true);
+  };
+
+  const handleRegenerateOk = () => {
+    regenerateSlide(regenData);
+    setIsRegenerateModalOpen(false);
+    setRegenData("");
+  };
+
+  const handleRegenerateCancel = () => {
+    setRegenData("");
+    setIsRegenerateModalOpen(false);
+  };
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -53,12 +82,29 @@ export const Tools = observer((): JSX.Element => {
         <Flex vertical={true} gap={8}>
           <Title level={5}>Слайд</Title>
           <Flex vertical={true} gap={4}>
-            <Button type="default" onClick={addSlide}>
-              Добавить
-            </Button>
-            <Button type="default" danger={true} onClick={removeCurrentSlide}>
-              Удалить
-            </Button>
+            <Tooltip
+              title="Добавится слайд в конец презентации"
+              placement="left">
+              <Button type="default" onClick={addSlide}>
+                Добавить
+              </Button>
+            </Tooltip>
+            <Tooltip
+              title="Если не нравится текущая генерация слайда, то здесь можно добавить информацию и перегенерировать слайд при помощи мощщщщного ИИ"
+              placement="left">
+              <Button type="default" onClick={showRegenerateModal}>
+                <DislikeOutlined />
+              </Button>
+            </Tooltip>
+            <Tooltip title="Удалится текущий слайд" placement="left">
+              <Button
+                disabled={(currentPresentation?.slides ?? []).length === 0}
+                type="default"
+                danger={true}
+                onClick={removeCurrentSlide}>
+                Удалить
+              </Button>
+            </Tooltip>
           </Flex>
         </Flex>
         <Flex vertical={true} gap={8}>
@@ -97,6 +143,20 @@ export const Tools = observer((): JSX.Element => {
           </Flex>
         </Flex>
       </Flex>
+      <Modal
+        title="Добавьте информацию для перегенерации"
+        open={isRegenerateModalOpen}
+        onOk={handleRegenerateOk}
+        onCancel={handleRegenerateCancel}>
+        <Flex>
+          <TextArea
+            rows={8}
+            placeholder="Добавьте сюда всю необходимую информацию для перегенерации текущуго слайда"
+            value={regenData}
+            onChange={(e) => setRegenData(e.target.value)}
+          />
+        </Flex>
+      </Modal>
       <Modal
         title="Выбери тему"
         open={isModalOpen}
