@@ -19,9 +19,6 @@ COPY ${DIR_NAME}/requirements.txt requirements.txt
 
 RUN apt update &&  apt clean && rm -rf /var/lib/apt/lists/*  && pip install --no-cache-dir --upgrade -r requirements.txt
 
-COPY ${DIR_NAME}/. .
-COPY . .
-
 RUN apt update && apt install --no-install-recommends -y \
         poppler-utils \
         libgl1 \
@@ -32,3 +29,5 @@ RUN apt update && apt install --no-install-recommends -y \
 		tesseract-ocr-rus \
     && apt clean && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir --upgrade -r requirements.txt
+COPY ${DIR_NAME}/. .
+COPY . .
