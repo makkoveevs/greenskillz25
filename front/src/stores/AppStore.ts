@@ -321,13 +321,26 @@ class MainModel {
     });
   };
 
+  public exportPresentation2 = (design: number): Promise<void> => {
+    return this.savePresentation().then(() => {
+      if (this.currentPresentation) {
+        return this.api
+          .exportPresentaion2(this.currentPresentation, design)
+          .then(() => Promise.resolve())
+          .catch(() => Promise.reject());
+      } else {
+        return Promise.reject();
+      }
+    });
+  };
+
   public regenerateSlide = (text: string): Promise<void> => {
     return this.savePresentation().then(() => {
       if (this.currentPresentation && this.currentSlide) {
         return this.api
           .regenerateSlide({
             ...this.currentPresentation,
-            slide_number: this.currentSlide?.slide_number,
+            slide_num: this.currentSlide?.slide_number,
             text
           })
           .then((res) => this.setCurrentPresentation(res.data))
@@ -336,6 +349,7 @@ class MainModel {
         return Promise.reject();
       }
     });
+    //blob:http://91.236.197.228:8081/f2af6ba0-4ced-4b11-9229-ac6d28661984
   };
 }
 
