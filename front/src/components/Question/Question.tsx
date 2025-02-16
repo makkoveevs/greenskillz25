@@ -20,14 +20,14 @@ const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 const ALLOWED_TYPES = {
-  pdf: "application/pdf"
-  // docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  // txt: "text/plain",
-  // xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  // pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  // odt: "application/vnd.oasis.opendocument.text",
-  // odp: "application/vnd.oasis.opendocument.presentation",
-  // ods: "application/vnd.oasis.opendocument.spreadsheet"
+  pdf: "application/pdf",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  txt: "text/plain",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  odt: "application/vnd.oasis.opendocument.text",
+  odp: "application/vnd.oasis.opendocument.presentation",
+  ods: "application/vnd.oasis.opendocument.spreadsheet"
 };
 
 export const Question = observer((): React.JSX.Element => {

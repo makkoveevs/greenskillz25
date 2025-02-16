@@ -88,16 +88,50 @@ class Api {
     );
   }
 
+  public async regenerateSlide(
+    data: TPrezData & { slide_number: number; text: string },
+    config?: AxiosRequestConfig
+  ): TResponse<TPrezData> {
+    return this.api.patch<TPrezData, TPrezData>(
+      `${SERVER_URL_MANUAL}/api/v1/presentations/presentation/${data.presentation_id}`,
+      { ...data },
+      config
+    );
+  }
+
   public async exportPresentaion(
     data: TPrezData,
     design: number,
     config?: AxiosRequestConfig
   ): TResponse<void> {
-    return this.api.get<void>(
-      `${SERVER_URL_MANUAL}/api/v1/presentations/download/${data.presentation_id}`,
-      { design },
-      config
-    );
+    return this.api
+      .get<Blob>(
+        `${SERVER_URL_MANUAL}/api/v1/presentations/download/${data.presentation_id}`,
+        {
+          design,
+          responseType: "arraybuffer"
+        },
+        {
+          ...config,
+          // headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            responseType: "arraybuffer",
+            "Content-Type": "application/json",
+            Accept:
+              "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+          }
+        }
+      )
+      .then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "presentation.pptx");
+        document.body.appendChild(link);
+        link.click();
+        return response;
+      })
+      .catch(() => Promise.reject());
   }
 }
 

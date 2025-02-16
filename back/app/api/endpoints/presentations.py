@@ -10,14 +10,12 @@ from typing import Union, List
 from starlette.responses import FileResponse, StreamingResponse
 
 from app.api.deps import keycloak_client, get_db_work, get_minio_client
-from app.celery.llm import update_slide
 from app.core.minio_client import MinioClient
 from app.schemas.auth_schemas import UserKeycloak
 from app.schemas.presentations_schema import (
     PresentationsRequestFile,
     PresentationsRequest, PresentationsRequestResponse,
-    PresentationsRequestResponseCompleted, PresentationsResultGet, Slide, PresentationsResultPatch,
-    PresentationsResultSlideUpdate
+    PresentationsRequestResponseCompleted, PresentationsResultGet, Slide, PresentationsResultPatch
 )
 from app.core.postgres import DBWork, Sort
 from app.models.models import (
@@ -105,18 +103,18 @@ async def get_request(
 @router.get("/presentation/{presentation_id}")
 async def get_presentation(
         presentation_id: uuid.UUID,
-        # user: UserKeycloak = Depends(keycloak_client.get_current_user),
+        user: UserKeycloak = Depends(keycloak_client.get_current_user),
         db_work: DBWork = Depends(get_db_work)
 ):
     presentation_obj: PresentationResultModel = await db_work.get_one_obj(
         PresentationResultModel,
         {'id': presentation_id}
     )
-    # if not presentation_obj:
-    #     raise error_dict.get(ErrorName.DoesNotExist)
-    # if settings.DEFAULT_ADMIN_GROUP not in user.groups:
-    #     if str(presentation_obj.user_id) != str(user.sub):
-    #         raise error_dict.get(ErrorName.Forbidden)
+    if not presentation_obj:
+        raise error_dict.get(ErrorName.DoesNotExist)
+    if settings.DEFAULT_ADMIN_GROUP not in user.groups:
+        if str(presentation_obj.user_id) != str(user.sub):
+            raise error_dict.get(ErrorName.Forbidden)
 
     slides: List[SlideModel] = await db_work.get_objects(SlideModel,
                                        [{"field": SlideModel.request_id, "value": presentation_obj.request_id}],
@@ -197,18 +195,18 @@ async def delete_presentation(
 async def download_presentation(
         presentation_id: uuid.UUID,
         design: int = Query(default=1),
-        # user: UserKeycloak = Depends(keycloak_client.get_current_user),
+        user: UserKeycloak = Depends(keycloak_client.get_current_user),
         db_work: DBWork = Depends(get_db_work)
 ):
     presentation_obj: PresentationResultModel = await db_work.get_one_obj(
         PresentationResultModel,
         {'id': presentation_id}
     )
-    # if not presentation_obj:
-    #     raise error_dict.get(ErrorName.DoesNotExist)
-    # if settings.DEFAULT_ADMIN_GROUP not in user.groups:
-    #     if str(presentation_obj.user_id) != str(user.sub):
-    #         raise error_dict.get(ErrorName.Forbidden)
+    if not presentation_obj:
+        raise error_dict.get(ErrorName.DoesNotExist)
+    if settings.DEFAULT_ADMIN_GROUP not in user.groups:
+        if str(presentation_obj.user_id) != str(user.sub):
+            raise error_dict.get(ErrorName.Forbidden)
     slides = await db_work.get_objects(SlideModel, [{'field': SlideModel.request_id, 'value': presentation_obj.request_id}],
                                        sort=[Sort(desc=False, sort_value=SlideModel.slide_num)])
     result_slides = {'slides': []}
@@ -223,72 +221,39 @@ async def download_presentation(
                  "Content-Type": "application/vnd.openxmlformats-officedocument.presentationml.presentation"})
 
 
-@router.patch("/regex/{presentation_id}")
-async def update_presentation(
+@router.get("/download_minio/{presentation_id}")
+async def download_presentation(
         presentation_id: uuid.UUID,
-        presentation_data: PresentationsResultSlideUpdate,
-        # user: UserKeycloak = Depends(keycloak_client.get_current_user),
+        design: int = Query(default=1),
+        user: UserKeycloak = Depends(keycloak_client.get_current_user),
         db_work: DBWork = Depends(get_db_work)
 ):
     presentation_obj: PresentationResultModel = await db_work.get_one_obj(
         PresentationResultModel,
         {'id': presentation_id}
     )
-    # if not presentation_obj:
-    #     raise error_dict.get(ErrorName.DoesNotExist)
-    # if settings.DEFAULT_ADMIN_GROUP not in user.groups:
-    #     if str(presentation_obj.user_id) != str(user.sub):
-    #         raise error_dict.get(ErrorName.Forbidden)
-    slide = None
-    slide_header_block = {}
-    for i in presentation_data.slides:
-        if i.slide_number == presentation_data.slide_num:
-            slide_id = i.id
-            slide = i.elements
-            text_current = []
-            slide_header = ''
-            for j in slide:
-                if j.get('text_type', '') == 'regular':
-                    text_current.append(j.get('content', ''))
-                if j.get('text_type', '') == 'header':
-                    slide_header = j.get('content', '')
-                    slide_header_block = j
-            break
-    else:
-        return
-    text_current = ' '.join(text_current)
-    new_text = presentation_data.text
-    print(presentation_obj.theme)
-    print(slide_header)
-    print(text_current)
-    print(new_text)
-    content = update_slide(theme=presentation_obj.theme, header=slide_header, text=text_current, added_text=new_text)
-    if slide_header_block:
-        slide = [slide_header_block, {
-                "id": str(uuid.uuid4()),
-                "text_type": "regular",
-                "alignment": "left",
-                "style": "regular",
-                "size": 16,
-                "content": content,
-                "w": 0.8,
-                "h": 0.7,
-                "x": 0.2,
-                "y": 0.3,
-            }]
-    else:
-        slide = [
-            {
-                "id": str(uuid.uuid4()),
-                "text_type": "regular",
-                "alignment": "left",
-                "style": "regular",
-                "size": 16,
-                "content": content,
-                "w": 0.8,
-                "h": 0.7,
-                "x": 0.2,
-                "y": 0.3,
-            }
-        ]
-    await db_work.update_obj(SlideModel, [{'field': SlideModel.id, 'value': slide_id}], {"elements": slide})
+    if not presentation_obj:
+        raise error_dict.get(ErrorName.DoesNotExist)
+    if settings.DEFAULT_ADMIN_GROUP not in user.groups:
+        if str(presentation_obj.user_id) != str(user.sub):
+            raise error_dict.get(ErrorName.Forbidden)
+    slides = await db_work.get_objects(SlideModel, [{'field': SlideModel.request_id, 'value': presentation_obj.request_id}],
+                                       sort=[Sort(desc=False, sort_value=SlideModel.slide_num)])
+    result_slides = {'slides': []}
+    for slide in slides:
+        result_slides['slides'].append({"elements": slide.elements, "id": slide.id, "slide_number": slide.slide_num})
+
+    from app.celery.pptx import get_pres1
+    get_pres1(result_slides, presentation_id, design)
+
+    try:
+        from app.utils.files import upload_files
+        upload_files([f"{presentation_id}.pptx"], presentation_id, MinioClient = Depends(get_minio_client))
+    except Exception as Err:
+        print(Err)
+
+    return FileResponse(
+        '1.pptx',
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        headers={'Content-Disposition': 'attachment; filename=1.pptx',
+                 "Content-Type": "application/vnd.openxmlformats-officedocument.presentationml.presentation"})
