@@ -143,3 +143,4 @@ langchain_unstructured
 unstructured[all-docs]
 onnx==1.16.1
 python-pptx
+aiofiles
