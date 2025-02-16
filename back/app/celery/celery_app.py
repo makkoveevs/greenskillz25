@@ -80,7 +80,7 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
             "w": 0,
             "h": 0,
             "x": 0.1,
-            "y": 0.1,
+            "y": 0.5,
         }
     ],
                     request_id=request_id)
@@ -160,11 +160,11 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
             "alignment": "center",  # left, right, center, justify
             "style": "bold",  # regular, bold, italic
             "size": 26,
-            "content": theme,
+            "content": "Спасибо за внимание!",
             "w": 0,
             "h": 0,
             "x": 0.1,
-            "y": 0.1,
+            "y": 0.5,
         }
     ],
                     request_id=request_id)

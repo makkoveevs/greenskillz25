@@ -21,3 +21,14 @@ RUN apt update &&  apt clean && rm -rf /var/lib/apt/lists/*  && pip install --no
 
 COPY ${DIR_NAME}/. .
 COPY . .
+
+RUN apt update && apt install --no-install-recommends -y \
+        poppler-utils \
+        libgl1 \
+        libglib2.0-0 \
+        gcc \
+        libzbar0 \
+		tesseract-ocr \
+		tesseract-ocr-rus \
+    && apt clean && rm -rf /var/lib/apt/lists/* \
+    && pip install --no-cache-dir --upgrade -r requirements.txt
