@@ -19,6 +19,9 @@ def create_prs(
     for slide_item in slides:
         slide = prs.slides.add_slide(prs.slide_layouts[6])
         for item in slide_item['elements']:
+            if item['content'] == "":
+                continue
+
             main_text_shape = slide.shapes.add_textbox(
                 item["x"]*prs.slide_width,
                 item["y"]*prs.slide_height,
