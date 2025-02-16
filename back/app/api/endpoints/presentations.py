@@ -1,10 +1,13 @@
 import datetime
+import io
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Form, status, Query
 from pydantic import ValidationError
 from fastapi.encoders import jsonable_encoder
 from typing import Union, List
+
+from starlette.responses import StreamingResponse
 
 from app.api.deps import keycloak_client, get_db_work, get_minio_client
 from app.core.minio_client import MinioClient
@@ -23,6 +26,7 @@ from app.core.config import settings
 from app.core.error_config import error_dict, ErrorName
 from app.celery.celery_app import create_request as celery_create_request
 from app.utils import files as file_utils
+from app.celery.pptx import get_pres
 
 router = APIRouter()
 
@@ -185,3 +189,33 @@ async def delete_presentation(
     return {
         "message": "Presentation deleted successfully"
     }
+
+
+@router.get("/download/{presentation_id}")
+async def download_presentation(
+        presentation_id: uuid.UUID,
+        design: int = Query(default=1),
+        user: UserKeycloak = Depends(keycloak_client.get_current_user),
+        db_work: DBWork = Depends(get_db_work)
+):
+    presentation_obj: PresentationResultModel = await db_work.get_one_obj(
+        PresentationResultModel,
+        {'id': presentation_id}
+    )
+    if not presentation_obj:
+        raise error_dict.get(ErrorName.DoesNotExist)
+    if settings.DEFAULT_ADMIN_GROUP not in user.groups:
+        if str(presentation_obj.user_id) != str(user.sub):
+            raise error_dict.get(ErrorName.Forbidden)
+    slides = await db_work.get_objects(SlideModel, [{'field': SlideModel.request_id, 'value': presentation_obj.request_id}],
+                                       sort=[Sort(desc=False, sort_value=SlideModel.slide_num)])
+    result_slides = {'slides': []}
+    for slide in slides:
+        result_slides['slides'].append({"elements": slide.elements, "id": slide.id, "slide_number": slide.slide_num})
+    get_pres(result_slides, presentation_id, design)
+    file_like = open(f'{presentation_id}.pptx', mode="rb")
+    return StreamingResponse(
+        file_like,
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": f"attachment; filename={presentation_id}.pptx"})
+

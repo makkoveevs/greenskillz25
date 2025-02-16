@@ -41,10 +41,10 @@ def create_prs(
     return prs
 
 
-def get_pres(pres_json, design_number=1):
+def get_pres(pres_json, id, design_number=1):
     prs = Presentation(f"pptx/{design_number}.pptx")
     create_prs(prs, pres_json['slides'])
-    prs.save("presentation.pptx")
+    prs.save(f"{id}.pptx")
 
 # pres = {
 #   "slides": [
