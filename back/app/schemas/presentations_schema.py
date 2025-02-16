@@ -49,3 +49,7 @@ class PresentationsResultGet(BaseModel):
 
 class PresentationsResultPatch(BaseModel):
     slides: List[Slide]
+
+class PresentationsResultSlideUpdate(PresentationsResultPatch):
+    text: str
+    slide_num: int
