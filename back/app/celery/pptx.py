@@ -31,6 +31,10 @@ def create_prs(
             main_text_p.alignment = alignment_map[item["alignment"]]
             main_text_run = main_text_p.runs[0]
             main_text_run.font.size = Pt(item['size'])
+            if item['style'] == 'bold':
+                main_text_run.font.bold = True
+            if item['style'] == 'italic':
+                main_text_run.font.italic = True
     
     # main_text_tf.auto_size = MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT
     
