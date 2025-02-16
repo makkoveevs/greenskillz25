@@ -2,7 +2,8 @@ import datetime
 import io
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Form, status, Query
+import aiofiles
+from fastapi import APIRouter, Depends, HTTPException, Form, status, Query, UploadFile
 from pydantic import ValidationError
 from fastapi.encoders import jsonable_encoder
 from typing import Union, List
@@ -252,7 +253,11 @@ async def download_presentation(
 
     try:
         from app.utils.files import upload_files
-        await upload_files([f"{presentation_id}.pptx"], presentation_id, s3_client)
+        file = await aiofiles.open(f"{presentation_id}.pptx", mode="rb")
+
+        # Создание объекта UploadFile
+        upload_file = UploadFile(file=file, filename=f"{presentation_id}.pptx")
+        await upload_files([upload_file], presentation_id, s3_client)
     except Exception as Err:
         print(Err)
 
