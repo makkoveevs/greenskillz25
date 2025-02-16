@@ -7,7 +7,7 @@ from pydantic import ValidationError
 from fastapi.encoders import jsonable_encoder
 from typing import Union, List
 
-from starlette.responses import StreamingResponse
+from starlette.responses import FileResponse, StreamingResponse
 
 from app.api.deps import keycloak_client, get_db_work, get_minio_client
 from app.core.minio_client import MinioClient
