@@ -33,9 +33,9 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
 
         for file in files:
             download_file(file, f'/app/{file.split("/")[-1]}')
-            with open('app/{file.split("/")[-1]}', 'r') as file:
-                data = file.read()
-            doc = parse_file_in_document(data)
+            # with open('app/{file.split("/")[-1]}', 'r') as file:
+            #     data = file.read()
+            doc = parse_file_in_document(f'/app/{file.split("/")[-1]}')
             text_file += get_text_from_document(doc)
             doc_list.append(doc)
 
