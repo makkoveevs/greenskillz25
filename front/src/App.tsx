@@ -12,10 +12,12 @@ import { PublicPage } from "./pages/PublicPage/PublicPage";
 import { Root } from "./Root";
 import { ConfigProvider } from "antd";
 import { ROUTES } from "./shared/constants";
+import { Login } from "./pages/Login/Login";
 
 const Private = lazy(() => import("./pages/Private/Private"));
 const Profile = lazy(() => import("src/pages/Profile"));
 const Prez = lazy(() => import("src/pages/Prez"));
+const PresentationsList = lazy(() => import("src/components/MyPresentations"));
 const Main = lazy(() => import("src/pages/Main"));
 
 const App = (): React.JSX.Element => {
@@ -25,9 +27,14 @@ const App = (): React.JSX.Element => {
         <Outlet />
         <Routes>
           <Route path={ROUTES.MAIN} element={<Root />} />
+          <Route path={ROUTES.LOGIN} element={<Login />} />
           <Route index element={<PublicPage />} />
           <Route path={ROUTES.APP} element={<Private />}>
             <Route index element={<Main />} />
+            <Route
+              path={ROUTES.PRESENTATIONS_LIST}
+              element={<PresentationsList />}
+            />
             <Route path={ROUTES.PROFILE} element={<Profile />} />
             <Route path={ROUTES.PRESENTATION} element={<Prez />} />
           </Route>

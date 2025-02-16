@@ -3,6 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { StyledButton, StyledFlex } from "./styles";
 import { StyledLogo } from "src/components/StyledLogo";
+import { ROUTES } from "src/shared/constants";
 
 const { Title } = Typography;
 
@@ -18,7 +19,7 @@ export const PublicPage = (): React.JSX.Element => (
       Здесь ты за две минуты сможешь сделать то, на что раньше уходило 6
       световых лет
     </Title>
-    <Link to={"app/profile"}>
+    <Link to={ROUTES.PRESENTATIONS_LIST}>
       <StyledButton>
         <div className="text-bg">
           <div className="text">Попробовать</div>

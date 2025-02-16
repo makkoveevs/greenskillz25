@@ -26,7 +26,7 @@ export const StyledFlex = styled(Flex)`
   height: 100%;
   background-color: "#46484a";
   /* background: url("src/assets/im2.png"); */
-  background: url("im2.png");
+  background: url("./im2.png");
   background-size: 100% 100%;
 
   animation-name: shakePageBackground;
@@ -163,7 +163,7 @@ export const StyledButton = styled(Button)`
     padding: 20px 43px;
     border-radius: 30px;
     /* background: url("src/assets/im2.png"); */
-    background: url("im2.png");
+    background: url("./im2.png");
     background-size: 100vw 100vh;
     background-position: 50% 50%;
     color: white;
