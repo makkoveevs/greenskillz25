@@ -216,6 +216,7 @@ async def download_presentation(
     file_like = open(f'{presentation_id}.pptx', mode="rb")
     return StreamingResponse(
         file_like,
-        media_type="application/octet-stream",
-        headers={"Content-Disposition": f"attachment; filename={presentation_id}.pptx"})
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        headers={"Content-Disposition": f"attachment; filename={presentation_id}.pptx",
+                 "Content-Type": "application/vnd.openxmlformats-officedocument.presentationml.presentation"})
 
