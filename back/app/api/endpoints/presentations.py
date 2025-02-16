@@ -213,10 +213,10 @@ async def download_presentation(
     for slide in slides:
         result_slides['slides'].append({"elements": slide.elements, "id": slide.id, "slide_number": slide.slide_num})
     get_pres(result_slides, presentation_id, design)
-    file_like = open(f'{presentation_id}.pptx', mode="r")
-    return StreamingResponse(
-        file_like,
+
+    return FileResponse(
+        f'{presentation_id}.pptx',
         media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
-        headers={"Content-Disposition": f"attachment; filename={presentation_id}.pptx",
+        headers={'Content-Disposition': f'attachment; filename="{presentation_id}.pptx"',
                  "Content-Type": "application/vnd.openxmlformats-officedocument.presentationml.presentation"})
 
