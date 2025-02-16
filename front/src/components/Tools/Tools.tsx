@@ -5,7 +5,8 @@ import {
   Modal,
   Tooltip,
   Typography,
-  Input
+  Input,
+  Checkbox
 } from "antd";
 import { ToolsStyled } from "./styles";
 import { observer } from "mobx-react-lite";
@@ -24,6 +25,7 @@ export const Tools = observer((): JSX.Element => {
     addText,
     savePresentation,
     exportPresentation,
+    exportPresentation2,
     currentPresentation,
     regenerateSlide
   } = Model;
@@ -31,7 +33,9 @@ export const Tools = observer((): JSX.Element => {
 
   const [regenData, setRegenData] = useState<string>("");
   const [isRegenerateModalOpen, setIsRegenerateModalOpen] = useState(false);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [directDownload, setDirectDownload] = useState(false);
 
   const showRegenerateModal = () => {
     setIsRegenerateModalOpen(true);
@@ -67,9 +71,15 @@ export const Tools = observer((): JSX.Element => {
   };
   const handleExport = (): void => {
     setIsLoading(true);
-    exportPresentation(design).finally(() => {
-      setIsLoading(false);
-    });
+    if (directDownload) {
+      exportPresentation2(design).finally(() => {
+        setIsLoading(false);
+      });
+    } else {
+      exportPresentation(design).finally(() => {
+        setIsLoading(false);
+      });
+    }
   };
   const [design, setDesign] = useState<number>(1);
   const onChange = (currentSlide: number) => {
@@ -185,6 +195,17 @@ export const Tools = observer((): JSX.Element => {
             </div>
           ))}
         </Carousel>
+        <Tooltip
+          title="Если есть проблемы со скачиванием, то решить их не получится даже чекбоксом"
+          placement="topLeft">
+          <Checkbox
+            checked={directDownload}
+            onChange={(e) => {
+              setDirectDownload(e.target.checked);
+            }}>
+            Прямое скачивание
+          </Checkbox>
+        </Tooltip>
       </Modal>
     </ToolsStyled>
   );
