@@ -10,6 +10,7 @@ from typing import Union, List
 from starlette.responses import FileResponse, StreamingResponse
 
 from app.api.deps import keycloak_client, get_db_work, get_minio_client
+from app.celery.llm import update_slide
 from app.core.minio_client import MinioClient
 from app.schemas.auth_schemas import UserKeycloak
 from app.schemas.presentations_schema import (
