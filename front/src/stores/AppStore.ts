@@ -320,6 +320,23 @@ class MainModel {
       }
     });
   };
+
+  public regenerateSlide = (text: string): Promise<void> => {
+    return this.savePresentation().then(() => {
+      if (this.currentPresentation && this.currentSlide) {
+        return this.api
+          .regenerateSlide({
+            ...this.currentPresentation,
+            slide_number: this.currentSlide?.slide_number,
+            text
+          })
+          .then((res) => this.setCurrentPresentation(res.data))
+          .catch(() => Promise.reject());
+      } else {
+        return Promise.reject();
+      }
+    });
+  };
 }
 
 export default new MainModel();
