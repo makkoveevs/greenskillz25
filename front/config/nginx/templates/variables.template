@@ -1,3 +1,0 @@
-map $host $kc_auth_server {
-  default "$KC_AUTH_SERVER";
-}

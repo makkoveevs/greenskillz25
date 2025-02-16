@@ -72,7 +72,14 @@ export default defineConfig(({ mode }) => {
     // },
 
     server: {
-      port: 8088
+      port: 8088,
+      proxy: {
+        "/api/v1/": {
+          target: env.API,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/v1/, "")
+        }
+      }
     }
   };
 });

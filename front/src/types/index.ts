@@ -11,7 +11,7 @@ export interface Slide {
   block: Block;
 }
 
-export type TSlideElementTextType = "header" | "regular" | "list";
+export type TSlideElementTextType = "header" | "regular"; //| "list";
 
 export type TSlideElementTextAlignment =
   | "center"
@@ -19,20 +19,18 @@ export type TSlideElementTextAlignment =
   | "right"
   | "justify";
 
-export type TSlideElementTestStyle =
-  | "style"
-  | "bold"
-  | "regular"
-  | "bold"
-  | "italic";
+export type TSlideElementTestStyle = "bold" | "regular" | "bold" | "italic";
+
+export type TSlideElementSize = { w: number; h: number; x: number; y: number };
 
 export type TSlideElement = {
+  id: string;
   text_type: TSlideElementTextType;
   alignment: TSlideElementTextAlignment;
   style: TSlideElementTestStyle;
   size: number;
   content: string;
-};
+} & TSlideElementSize;
 
 export type TSlide = {
   id: string;
@@ -42,11 +40,11 @@ export type TSlide = {
 
 export type TRequestStatus = "pending" | "processing" | "completed" | "failed";
 
-export type TPrezResponse = {
-  request_id: string;
-  status: TRequestStatus;
-  theme: string;
-};
+// export type TPrezResponse = {
+//   request_id: string;
+//   status: TRequestStatus;
+//   theme: string;
+// };
 
 //это же в me
 export type TPrezStatusResponse = {
@@ -58,6 +56,7 @@ export type TPrezStatusResponse = {
 
 export type TPrezData = {
   presentation_id: string;
+  request_id: string;
   theme: string;
   status: TRequestStatus;
   slides: TSlide[];
