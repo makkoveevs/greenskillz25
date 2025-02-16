@@ -195,18 +195,18 @@ async def delete_presentation(
 async def download_presentation(
         presentation_id: uuid.UUID,
         design: int = Query(default=1),
-        user: UserKeycloak = Depends(keycloak_client.get_current_user),
+        # user: UserKeycloak = Depends(keycloak_client.get_current_user),
         db_work: DBWork = Depends(get_db_work)
 ):
     presentation_obj: PresentationResultModel = await db_work.get_one_obj(
         PresentationResultModel,
         {'id': presentation_id}
     )
-    if not presentation_obj:
-        raise error_dict.get(ErrorName.DoesNotExist)
-    if settings.DEFAULT_ADMIN_GROUP not in user.groups:
-        if str(presentation_obj.user_id) != str(user.sub):
-            raise error_dict.get(ErrorName.Forbidden)
+    # if not presentation_obj:
+    #     raise error_dict.get(ErrorName.DoesNotExist)
+    # if settings.DEFAULT_ADMIN_GROUP not in user.groups:
+    #     if str(presentation_obj.user_id) != str(user.sub):
+    #         raise error_dict.get(ErrorName.Forbidden)
     slides = await db_work.get_objects(SlideModel, [{'field': SlideModel.request_id, 'value': presentation_obj.request_id}],
                                        sort=[Sort(desc=False, sort_value=SlideModel.slide_num)])
     result_slides = {'slides': []}
@@ -225,18 +225,20 @@ async def download_presentation(
 async def download_presentation(
         presentation_id: uuid.UUID,
         design: int = Query(default=1),
-        user: UserKeycloak = Depends(keycloak_client.get_current_user),
-        db_work: DBWork = Depends(get_db_work)
+        # user: UserKeycloak = Depends(keycloak_client.get_current_user),
+        s3_client: MinioClient = Depends(get_minio_client),
+        db_work: DBWork = Depends(get_db_work),
+
 ):
     presentation_obj: PresentationResultModel = await db_work.get_one_obj(
         PresentationResultModel,
         {'id': presentation_id}
     )
-    if not presentation_obj:
-        raise error_dict.get(ErrorName.DoesNotExist)
-    if settings.DEFAULT_ADMIN_GROUP not in user.groups:
-        if str(presentation_obj.user_id) != str(user.sub):
-            raise error_dict.get(ErrorName.Forbidden)
+    # if not presentation_obj:
+    #     raise error_dict.get(ErrorName.DoesNotExist)
+    # if settings.DEFAULT_ADMIN_GROUP not in user.groups:
+    #     if str(presentation_obj.user_id) != str(user.sub):
+    #         raise error_dict.get(ErrorName.Forbidden)
     slides = await db_work.get_objects(SlideModel, [{'field': SlideModel.request_id, 'value': presentation_obj.request_id}],
                                        sort=[Sort(desc=False, sort_value=SlideModel.slide_num)])
     result_slides = {'slides': []}
@@ -248,7 +250,7 @@ async def download_presentation(
 
     try:
         from app.utils.files import upload_files
-        upload_files([f"{presentation_id}.pptx"], presentation_id, MinioClient = Depends(get_minio_client))
+        upload_files([f"{presentation_id}.pptx"], presentation_id, s3_client)
     except Exception as Err:
         print(Err)
 
