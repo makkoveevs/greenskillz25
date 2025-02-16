@@ -20,8 +20,10 @@ def create_prs(
         slide = prs.slides.add_slide(prs.slide_layouts[6])
         for item in slide_item['elements']:
             main_text_shape = slide.shapes.add_textbox(
-                item["coords"][0]*prs.slide_width, item["coords"][1]*prs.slide_height,
-                item["coords"][2]*prs.slide_width, item["coords"][3]*prs.slide_height
+                item["x"]*prs.slide_width,
+                item["y"]*prs.slide_height,
+                item["x"]*prs.slide_width+item["w"]*prs.slide_width,
+                item["y"]*prs.slide_height+item["h"]*prs.slide_height
             )
             main_text_tf = main_text_shape.text_frame
             main_text_tf.text = item['content']
