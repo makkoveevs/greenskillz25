@@ -39,7 +39,7 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
             text_file += get_text_from_document(doc)
             doc_list.append(doc)
 
-        embeddings = OllamaEmbeddings(model="bge-m3")
+        embeddings = OllamaEmbeddings(model="bge-m3", base_url='http://ollama:11434')
         vector_store = InMemoryVectorStore(embeddings)
         for doc in doc_list:
             vector_store = create_vector_store(vector_store=vector_store, document=doc)
