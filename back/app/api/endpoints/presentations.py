@@ -256,6 +256,22 @@ async def download_presentation(
     except Exception as Err:
         print(Err)
 
+    try:
+        from minio import Minio
+        client = Minio(
+            settings.MINIO_ENDPOINT_URL,
+            access_key=settings.MINIO_ACCESS_KEY,
+            secret_key=settings.MINIO_SECRET_KEY
+        )
+        result = client.put_object(
+            bucket_name='delta',
+            object_name='1.pptx',
+            data=open('1.pptx', 'rb'),
+            length=1024 * 1024 # размер файла в байтах
+        )
+    except Exception as Err:
+        print(Err)
+        
     return FileResponse(
         '1.pptx',
         media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
