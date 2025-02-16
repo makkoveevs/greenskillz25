@@ -75,7 +75,7 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
             "text_type": "header",  # regular, header, list
             "alignment": "center",  # left, right, center, justify
             "style": "bold",  # regular, bold, italic
-            "size": 48,
+            "size": 26,
             "content": theme,
             "w": 0,
             "h": 0,
@@ -92,11 +92,11 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
             "text_type": "regular",  # regular, header, list
             "alignment": "center",  # left, right, center, justify
             "style": "bold",  # regular, bold, italic
-            "size": 48,
+            "size": 16,
             "content": i.slide_header,
             "w": 0,
             "h": 0,
-            "x": 0.1,
+            "x": 0.2,
             "y": 0.95 if 0.3+n*0.6/len(slides) >= 1 else 0.3+n*0.6/len(slides),
         })
 
@@ -105,7 +105,7 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
             "text_type": "header",  # regular, header, list
             "alignment": "center",  # left, right, center, justify
             "style": "bold",  # regular, bold, italic
-            "size": 48,
+            "size": 26,
             "content": "Оглавление",
             "w": 0,
             "h": 0,
@@ -129,7 +129,7 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
               "text_type": "header", # regular, header, list
               "alignment": "center", # left, right, center, justify
               "style": "bold", # regular, bold, italic
-              "size": 48,
+              "size": 26,
               "content": slide.slide_header,
                 "w": 0,
                 "h": 0,
@@ -141,11 +141,11 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
               "text_type": "regular",
               "alignment": "left",
               "style": "regular",
-              "size": 24,
+              "size": 16,
               "content": slide_content,
                 "w": 0,
                 "h": 0,
-                "x": 0.1,
+                "x": 0.2,
                 "y": 0.3,
             }
         ]
@@ -153,6 +153,21 @@ def create_request(request_id: uuid.UUID, theme: str, user_id: uuid.UUID,
         history += slide_content
         db_work.update_obj(Slide, [{'field': Slide.id, 'value': slide.id}],
                            {'slide_header': slide.slide_header, "elements": elements, "updated_at": datetime.datetime.utcnow()})
+    slide_last = Slide(id=uuid.uuid4(), slide_num=1, slide_header=theme, elements=[
+        {
+            "id": str(uuid.uuid4()),
+            "text_type": "header",  # regular, header, list
+            "alignment": "center",  # left, right, center, justify
+            "style": "bold",  # regular, bold, italic
+            "size": 26,
+            "content": theme,
+            "w": 0,
+            "h": 0,
+            "x": 0.1,
+            "y": 0.1,
+        }
+    ],
+                    request_id=request_id)
     db_work.update_obj(PresentationRequest, [{'field': PresentationRequest.id, 'value': request_id}],
                        {"status": RequestStatus.COMPLETED, "updated_at": datetime.datetime.utcnow()})
 
