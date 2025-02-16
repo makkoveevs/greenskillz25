@@ -4,7 +4,7 @@ import Model from "src/stores";
 import { Flex, Typography } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 export const MainCanvas = observer((): React.JSX.Element => {
   const {
@@ -20,31 +20,6 @@ export const MainCanvas = observer((): React.JSX.Element => {
     w: 600,
     h: 600 * RATIO_W_H
   });
-
-  // const [positions, setPositions] = useState(
-  //   Object.fromEntries(
-  //     (currentSlide?.elements ?? []).map((el) => [
-  //       el.id,
-  //       {
-  //         x: slideSize.w * el.x,
-  //         y: slideSize.h * el.y
-  //       }
-  //     ])
-  //   )
-  // );
-  // useEffect(() => {
-  //   setPositions(
-  //     Object.fromEntries(
-  //       (currentSlide?.elements ?? []).map((el) => [
-  //         el.id,
-  //         {
-  //           x: slideSize.w * el.x,
-  //           y: slideSize.h * el.y
-  //         }
-  //       ])
-  //     )
-  //   );
-  // }, [currentSlide, slideSize.h, slideSize.w]);
 
   const [dragging, setDragging] = useState<string | null>(null);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -86,18 +61,6 @@ export const MainCanvas = observer((): React.JSX.Element => {
       y: Math.min(1, newPosition.y / slideSize.h)
     };
     moveElement(dragging, newPositionComputed);
-    // setPositions((prevPositions) => {
-    //   const newPosition = {
-    //     x: Math.max(0, Math.min(newX, containerRect.width)),
-    //     y: Math.max(0, Math.min(newY, containerRect.height))
-    //   };
-    //   const newPositionComputed = {
-    //     x: Math.min(1, newPosition.x / slideSize.w),
-    //     y: Math.min(1, newPosition.y / slideSize.h)
-    //   };
-    //   moveElement(dragging, newPositionComputed);
-    //   return { ...prevPositions, [dragging]: newPosition };
-    // });
   };
 
   const stopDrag = () => {
@@ -123,31 +86,9 @@ export const MainCanvas = observer((): React.JSX.Element => {
       if (byWidth > RATIO_W_H) {
         const newSlideSize = { w: parentH / RATIO_W_H, h: parentH };
         setSlideSize(newSlideSize);
-        // setPositions(
-        //   Object.fromEntries(
-        //     (currentSlide?.elements ?? []).map((el) => [
-        //       el.id,
-        //       {
-        //         x: newSlideSize.w * el.x,
-        //         y: newSlideSize.h * el.y
-        //       }
-        //     ])
-        //   )
-        // );
       } else {
         const newSlideSize = { w: parentW, h: parentW / RATIO_W_H };
         setSlideSize(newSlideSize);
-        // setPositions(
-        //   Object.fromEntries(
-        //     (currentSlide?.elements ?? []).map((el) => [
-        //       el.id,
-        //       {
-        //         x: newSlideSize.w * el.x,
-        //         y: newSlideSize.h * el.y
-        //       }
-        //     ])
-        //   )
-        // );
       }
     }
   };
@@ -167,15 +108,7 @@ export const MainCanvas = observer((): React.JSX.Element => {
         observer.disconnect();
       };
     }
-  }, [RATIO_W_H]);
-
-  useEffect(() => {
-    console.log(
-      (currentSlide?.elements ?? []).forEach((e) =>
-        console.log(e.content.substring(0, 7), e.x, e.y)
-      )
-    );
-  });
+  }, [RATIO_W_H, calculateSlideSize]);
 
   useEffect(() => {
     calculateSlideSize();
@@ -195,7 +128,9 @@ export const MainCanvas = observer((): React.JSX.Element => {
       vertical={true}
       align="center"
       justify="center"
-      ref={elRef}>
+      ref={elRef}
+      gap={20}>
+      <Text>Слайд №{currentSlide.slide_number}</Text>
       <div
         style={{
           position: "relative",
@@ -204,7 +139,6 @@ export const MainCanvas = observer((): React.JSX.Element => {
           border: "1px solid gray",
           borderRadius: "2px"
         }}
-        // onClick={() => setIdEditable(null)}
         ref={containerRef}
         className="main-canvas"
         draggable={"false"}
@@ -224,14 +158,9 @@ export const MainCanvas = observer((): React.JSX.Element => {
                   top:
                     ((currentSlide?.elements ?? []).find((e) => e.id === el.id)
                       ?.y ?? 0) * slideSize.h,
-                  // top: positions[el.id]?.y ?? 0,
-                  // left: positions[el.id]?.x ?? 0,
-                  // top: positions[el.id]?.y ?? 0,
                   padding: "0px"
                 }}
                 level={el.text_type === "regular" ? 5 : 1}
-                // onMouseEnter={() => setIdEditable(index)}
-                // onMouseOut={() => setIdEditable(null)}
                 editable={{
                   onChange: (e) => {
                     editText(el.id, e);
@@ -242,12 +171,10 @@ export const MainCanvas = observer((): React.JSX.Element => {
                   tooltip: "Нажми, чтобы изменить текст",
                   enterIcon: null
                 }}
-                // onMouseDown={(e) => startDrag(e, index)}
                 onMouseDown={(e) => startDrag(e, el.id)}
                 id={`block-${index}`}
-                // ref={(el) => (blockRefs.current[e.id] = el!)}>
                 ref={(ee) => (blockRefs.current[el.id] = ee!)}>
-                {el.content.substring(0, 7)}
+                {el.content}
               </Title>
             );
           } else {

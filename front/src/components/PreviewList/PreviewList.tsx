@@ -10,6 +10,9 @@ import {
 import { observer } from "mobx-react-lite";
 import Model from "src/stores/AppStore";
 import { TSlide } from "src/types";
+import { Flex, Typography } from "antd";
+
+const { Text } = Typography;
 
 const grid = 8;
 
@@ -27,10 +30,8 @@ export const PreviewList = observer((): JSX.Element => {
     isDragging: boolean,
     draggableStyle: DraggingStyle | NotDraggingStyle | undefined
   ): React.CSSProperties => ({
-    // some basic styles to make the items look a bit nicer
     userSelect: "none",
     padding: "2px",
-    // padding: grid * 2,
     margin: `0 0 ${grid}px 0`,
 
     width: "100px",
@@ -38,10 +39,8 @@ export const PreviewList = observer((): JSX.Element => {
     border: "1px solid grey",
     borderRadius: "4px",
 
-    // change background colour if dragging
     background: isDragging ? "lightgrey" : "transparent",
 
-    // styles we need to apply on draggables
     ...draggableStyle
   });
 
@@ -91,25 +90,28 @@ export const PreviewList = observer((): JSX.Element => {
                       setCurrentSlide(null);
                       setCurrentSlide(e);
                     }}>
-                    {e.slide_number}
-                    {/* <Flex>
-                      {e.id === currentSlide?.id && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            left: "12px",
-                            top: "12px",
-                            zIndex: 10,
-                            backgroundColor: "blue",
-                            width: "8px",
-                            height: "8px",
-                            borderRadius: "4px",
-                            userSelect: "none"
-                          }}>
-                          &nbsp;
-                        </div>
-                      )}
-                    </Flex> */}
+                    <Flex
+                      vertical={true}
+                      align="flex-start"
+                      justify="flex-start"
+                      gap={2}>
+                      <Text>{e.slide_number}</Text>
+                      {e.elements
+                        .filter((elm) => elm.text_type === "header")
+                        .map((elm) => (
+                          <Text
+                            key={elm.id}
+                            style={{
+                              fontSize: "8px",
+                              width: "90%",
+                              marginLeft: "10%",
+                              marginTop: "10%"
+                            }}
+                            ellipsis={true}>
+                            {elm.content}
+                          </Text>
+                        ))}
+                    </Flex>
                   </div>
                 )}
               </Draggable>

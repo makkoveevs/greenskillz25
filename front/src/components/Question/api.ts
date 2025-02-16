@@ -87,6 +87,18 @@ class Api {
       config
     );
   }
+
+  public async exportPresentaion(
+    data: TPrezData,
+    design: number,
+    config?: AxiosRequestConfig
+  ): TResponse<void> {
+    return this.api.get<void>(
+      `${SERVER_URL_MANUAL}/api/v1/presentations/download/${data.presentation_id}`,
+      { design },
+      config
+    );
+  }
 }
 
 export default new Api();

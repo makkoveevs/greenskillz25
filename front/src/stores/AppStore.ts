@@ -81,7 +81,6 @@ class MainModel {
         return res.data;
       })
       .catch(() => {
-        // this.setCurrentRequest(MOCK_REQ);
         return Promise.reject();
       });
   };
@@ -97,8 +96,6 @@ class MainModel {
         return res.data;
       })
       .catch(() => {
-        // this.setCurrentPresentation(MOCK_PRES);
-        // this.setCurrentSlide(MOCK_PRES.slides[0] ?? null);
         return Promise.reject(new Error("Ошибка получения данных"));
       });
   };
@@ -162,22 +159,23 @@ class MainModel {
     }
     const uuid = uuidv4();
 
-    const newElements: TSlideElement[] = [...this.currentSlide.elements];
-    newElements.push({
+    const newElement: TSlideElement = {
       id: uuid,
       content: "Заголовок",
       text_type: "header",
       alignment: "center",
-      size: 28,
+      size: 26,
       style: "regular",
       x: 0.5,
       y: 0.5,
       h: 0,
       w: 0
-    });
+    };
 
     const newSlides = this.currentPresentation.slides.map((sl) =>
-      sl.id === this.currentSlide?.id ? { ...sl, elements: newElements } : sl
+      sl.id === this.currentSlide?.id
+        ? { ...sl, elements: sl.elements.concat(newElement) }
+        : sl
     );
 
     this.setCurrentPresentation({
@@ -185,14 +183,14 @@ class MainModel {
       slides: newSlides
     });
   };
+
   public addText = (): void => {
     if (!this.currentPresentation || !this.currentSlide) {
       return;
     }
     const uuid = uuidv4();
 
-    const newElements: TSlideElement[] = [...this.currentSlide.elements];
-    newElements.push({
+    const newElement: TSlideElement = {
       id: uuid,
       content: "Текст",
       text_type: "regular",
@@ -203,10 +201,12 @@ class MainModel {
       y: 0.5,
       h: 0,
       w: 0
-    });
+    };
 
     const newSlides = this.currentPresentation.slides.map((sl) =>
-      sl.id === this.currentSlide?.id ? { ...sl, elements: newElements } : sl
+      sl.id === this.currentSlide?.id
+        ? { ...sl, elements: sl.elements.concat(newElement) }
+        : sl
     );
 
     this.setCurrentPresentation({
@@ -243,24 +243,18 @@ class MainModel {
     if (editedElementIndex === -1) {
       return;
     }
-    const editedElement = this.currentSlide.elements[editedElementIndex];
 
-    const editedElementWithNewText: TSlideElement = {
-      ...editedElement,
-      content: text
-    };
-
-    const curSlideWithNewText: TSlide = {
-      ...this.currentSlide,
-      elements: [...this.currentSlide.elements].splice(
-        editedElementIndex,
-        1,
-        editedElementWithNewText
-      )
-    };
-    const newSlides = (this.currentPresentation?.slides ?? []).map((p) =>
-      p.id === this.currentSlide?.id ? curSlideWithNewText : p
+    const newSlides = this.currentPresentation.slides.map((sl) =>
+      sl.id === this.currentSlide?.id
+        ? {
+            ...sl,
+            elements: sl.elements.map((elm) =>
+              elm.id === element_id ? { ...elm, content: text } : elm
+            )
+          }
+        : sl
     );
+
     this.setCurrentPresentation({
       ...this.currentPresentation,
       slides: newSlides
@@ -269,7 +263,6 @@ class MainModel {
 
   public moveElement = (
     element_id: string,
-    // editedElementIndex: number,
     { x, y }: { x: number; y: number }
   ): void => {
     if (!this.currentSlide || !this.currentPresentation) {
@@ -291,10 +284,8 @@ class MainModel {
 
     const curSlideWithNewData: TSlide = {
       ...this.currentSlide,
-      elements: [...this.currentSlide.elements].splice(
-        editedElementIndex,
-        1,
-        editedElementWithNewCoords
+      elements: [...this.currentSlide.elements].map((e) =>
+        e.id === element_id ? editedElementWithNewCoords : e
       )
     };
     const newSlides = (this.currentPresentation?.slides ?? []).map((sl) =>
@@ -317,9 +308,17 @@ class MainModel {
     }
   };
 
-  public exportPresentation = (): Promise<void> => {
-    //TODO
-    return this.savePresentation();
+  public exportPresentation = (design: number): Promise<void> => {
+    return this.savePresentation().then(() => {
+      if (this.currentPresentation) {
+        return this.api
+          .exportPresentaion(this.currentPresentation, design)
+          .then(() => Promise.resolve())
+          .catch(() => Promise.reject());
+      } else {
+        return Promise.reject();
+      }
+    });
   };
 }
 

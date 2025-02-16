@@ -22,7 +22,16 @@ const Main = lazy(() => import("src/pages/Main"));
 
 const App = (): React.JSX.Element => {
   return (
-    <ConfigProvider>
+    <ConfigProvider
+      theme={{
+        components: {
+          Carousel: {
+            dotWidth: 20,
+            dotHeight: 20,
+            dotActiveWidth: 50
+          }
+        }
+      }}>
       <Router>
         <Outlet />
         <Routes>
