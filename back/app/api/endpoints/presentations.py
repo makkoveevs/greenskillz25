@@ -252,7 +252,7 @@ async def download_presentation(
 
     try:
         from app.utils.files import upload_files
-        upload_files([f"{presentation_id}.pptx"], presentation_id, s3_client)
+        await upload_files([f"{presentation_id}.pptx"], presentation_id, s3_client)
     except Exception as Err:
         print(Err)
 
