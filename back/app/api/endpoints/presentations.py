@@ -7,7 +7,7 @@ from pydantic import ValidationError
 from fastapi.encoders import jsonable_encoder
 from typing import Union, List
 
-from starlette.responses import StreamingResponse
+from starlette.responses import FileResponse, StreamingResponse
 
 from app.api.deps import keycloak_client, get_db_work, get_minio_client
 from app.core.minio_client import MinioClient
@@ -213,10 +213,10 @@ async def download_presentation(
     for slide in slides:
         result_slides['slides'].append({"elements": slide.elements, "id": slide.id, "slide_number": slide.slide_num})
     get_pres(result_slides, presentation_id, design)
-    file_like = open(f'{presentation_id}.pptx', mode="rb")
-    return StreamingResponse(
-        file_like,
+
+    return FileResponse(
+        f'{presentation_id}.pptx',
         media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
-        headers={"Content-Disposition": f"attachment; filename={presentation_id}.pptx",
+        headers={'Content-Disposition': f'attachment; filename="{presentation_id}.pptx"',
                  "Content-Type": "application/vnd.openxmlformats-officedocument.presentationml.presentation"})
 
